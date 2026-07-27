@@ -1,0 +1,8 @@
+.next
+coverage
+node_modules
+package-lock.json
+
+# Documentos aprovados antes da adoção do Prettier na Etapa 3.
+README.md
+docs/plano-de-implementacao.md
