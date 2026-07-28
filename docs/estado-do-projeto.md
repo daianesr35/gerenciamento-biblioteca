@@ -9,6 +9,8 @@ arquitetura base executável:
 - **Etapa 2 — Criação do plano técnico:** concluída.
 - **Etapa 3 — Definição e implementação da arquitetura base:** concluída.
 - **Etapa 4 — Design do Sistema:** concluída em 28 de julho de 2026.
+- **Etapa 5 — Modelagem do banco de dados:** concluída; as Tarefas 5.1 a 5.5
+  foram concluídas.
 
 O repositório possui uma aplicação Next.js tipada e preparada para evolução
 modular. A implementação consolidada da Etapa 4 inclui as dez telas principais,
@@ -16,8 +18,16 @@ a tela auxiliar de Edição de Livro, a navegação-base e componentes visuais
 reutilizáveis. As telas utilizam dados simulados e comportamentos locais para
 representar integrações e funcionalidades reservadas às etapas posteriores.
 
-Nenhuma tabela, migration, autenticação definitiva, integração funcional com a
-Google Books, QR Code funcional ou recurso remoto foi criado. Login, Dashboard,
+As tabelas `proprietarios`, `bibliotecas`, `livros`, `solicitacoes` e
+`emprestimos` e suas migrations SQL de domínio foram criadas. O catálogo
+persistente possui dados bibliográficos, situação controlada e vínculo
+obrigatório com Biblioteca. Solicitações e Empréstimos possuem estados, datas,
+relacionamentos com Livro e vínculo opcional entre si. RLS está habilitada nas
+cinco tabelas, o vínculo único com `auth.users` sustenta o isolamento privado e
+o acesso anônimo está restrito a três RPCs mínimas, sem acesso direto às
+tabelas. Nenhuma tela foi conectada ao banco. Autenticação funcional, integração
+com a Google Books, QR Code funcional e recursos remotos não foram criados.
+Login, Dashboard,
 Biblioteca, Cadastro de Livro, Detalhes do Livro, Solicitações, Empréstimos,
 Configurações, Perfil e Página Pública passaram pela revisão visual específica e
 pela consolidação final de consistência, navegação, responsividade e
@@ -30,7 +40,9 @@ acessibilidade da Etapa 4.
 - `docs/plano-de-implementacao.md`: roteiro técnico incremental detalhado.
 - `docs/arquitetura.md`: documentação da arquitetura definida e implementada na
   Etapa 3.
-- `docs/banco-de-dados.md`: estrutura reservada para a Etapa 5.
+- `docs/banco-de-dados.md`: infraestrutura, estratégia de migrations, modelo,
+  vínculo com `auth.users`, RLS e acesso público mínimo concluídos até a Tarefa
+  5.5.
 - `docs/estado-do-projeto.md`: registro do estado atual.
 
 ## Resumo da Etapa 1
@@ -156,7 +168,7 @@ adiadas e permanecem pendentes.
 ## Pendências
 
 - Manter as telas auxiliares adiadas para etapa posterior.
-- Modelar o banco, migrations, restrições e políticas RLS.
+- Iniciar a Etapa 6 — Autenticação somente mediante autorização específica.
 - Implementar e validar as funcionalidades definitivas previstas na SDD durante
   suas respectivas etapas.
 - Preparar testes integrados e deploy nas respectivas etapas.
@@ -165,12 +177,31 @@ As validações automatizadas da consolidação final — lint, typecheck, teste
 build e `git diff --check` — foram aprovadas. A Etapa 4 está formalmente
 concluída.
 
-A Etapa 5 não foi iniciada. Não existem schema definitivo, migrations, tabelas,
-restrições ou políticas RLS no repositório.
+A infraestrutura local da Tarefa 5.1 permanece disponível. A Tarefa 5.2 criou a
+primeira migration de domínio, com as tabelas `proprietarios` e `bibliotecas`,
+chaves UUID, e-mail único, identificador público único e relacionamento 1:1.
+A Tarefa 5.3 criou uma nova migration com a tabela `livros`, seus atributos
+bibliográficos, situação `disponivel` ou `emprestado`, vínculo obrigatório com
+Biblioteca e índice do catálogo por Biblioteca. A Tarefa 5.4 criou uma terceira
+migration de domínio com `solicitacoes` e `emprestimos`, relacionamentos
+obrigatórios com Livro, vínculo opcional e único entre Solicitação e Empréstimo,
+status de Solicitação, datas e restrições estruturais. Não foram criados Perfil,
+autenticação funcional, seeds, triggers, procedures, regras transacionais ou
+integração da interface. A Tarefa 5.5 adicionou `usuario_auth_id` a Proprietário,
+habilitou RLS nas cinco tabelas, criou policies privadas por operação e limitou
+o acesso público a três funções com grants mínimos. As telas continuam baseadas
+em mocks.
+
+As validações da Tarefa 5.5 reconstruíram o banco do zero, aplicaram as quatro
+migrations, executaram testes positivos e negativos com dois Proprietários e os
+papéis `authenticated` e `anon`, e terminaram os dados de teste com `rollback`.
+O lint do schema e os advisors locais de segurança e desempenho não encontraram
+problemas.
 
 ## Próxima etapa recomendada
 
-**Etapa 5 — Modelagem e Implementação do Banco de Dados.**
+**Etapa 6 — Autenticação.**
 
-A Etapa 5 permanece não iniciada e só deverá ser executada mediante autorização
-específica, seguindo o plano técnico oficial.
+A Etapa 5 está concluída. Cadastro, login, sessão, logout, cliente de servidor e
+proteção de rotas continuam pendentes e só deverão ser implementados mediante
+autorização específica, seguindo a SDD e o plano técnico oficiais.

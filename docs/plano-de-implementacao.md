@@ -54,7 +54,7 @@ tabelas, rotas, tecnologias ou provedores.
 | 2 | Criação do plano técnico | Concluída |
 | 3 | Definição e implementação da arquitetura base | Concluída |
 | 4 | Design do Sistema (UI/UX e Design System) | Concluída |
-| 5 | Modelagem do banco de dados | Pendente |
+| 5 | Modelagem do banco de dados | Concluída |
 | 6 | Autenticação | Pendente |
 | 7 | Cadastro manual de livros | Pendente |
 | 8 | Integração com Google Books | Pendente |
@@ -392,7 +392,9 @@ histórico/guia de migrations definido pela arquitetura.
 **Critério de conclusão:** modelo versionado, documentado e validado em ambiente
 de desenvolvimento, sem implementação dos fluxos de interface.
 
-**Status atual:** **Pendente.**
+**Status atual:** **Concluída.** Modelo persistente, migrations, vínculo com
+`auth.users`, RLS, isolamento por Proprietário e acesso público mínimo
+implementados e validados.
 
 ### Etapa 6 — Autenticação
 
@@ -949,7 +951,8 @@ falhas não bloqueadoras precisam de justificativa, risco e pendência registrad
 - As tecnologias e a arquitetura base foram definidas na Etapa 3.
 - O projeto executável e as ferramentas de qualidade foram configurados.
 - O Design System e as interfaces simuladas foram concluídos na Etapa 4.
-- O banco, as migrations e as políticas RLS ainda não foram modelados.
+- O banco, as migrations e as políticas RLS foram modelados e validados na
+  Etapa 5.
 - Todas as funcionalidades da SDD permanecem não implementadas.
 - A escolha/configuração de serviços externos e ambientes permanece para as
   etapas correspondentes.
@@ -959,4 +962,4 @@ antecipadas durante a Etapa 4.
 
 ## 10. Próxima etapa recomendada
 
-A próxima etapa é a **Etapa 5 — Modelagem do banco de dados**.
+A próxima etapa é a **Etapa 6 — Autenticação**.

@@ -2,6 +2,7 @@
 coverage
 node_modules
 package-lock.json
+supabase/.temp
 
 # Documentos aprovados antes da adoção do Prettier na Etapa 3.
 README.md

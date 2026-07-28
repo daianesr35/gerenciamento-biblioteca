@@ -34,7 +34,8 @@ A aplicação adota um monólito web modular com Next.js e App Router. O mesmo
 projeto entrega a interface React e, futuramente, os pontos de execução no
 servidor necessários para proteger operações e integrar serviços externos.
 Supabase foi confirmado como backend gerenciado futuro e Vercel como plataforma
-de hospedagem futura.
+de hospedagem futura. O banco local versionado aplica RLS por Proprietário e
+oferece uma superfície pública mínima por funções RPC restritas.
 
 As responsabilidades são separadas da seguinte forma:
 
@@ -62,6 +63,7 @@ funcional correspondente for executada.
 | ESLint 9       | análise estática          | regras recomendadas do Next.js e TypeScript                         |
 | Prettier 3     | formatação                | padrão determinístico dos artefatos técnicos                        |
 | Vitest 4       | testes automatizados      | estrutura mínima rápida e compatível com TypeScript                 |
+| Supabase CLI 2 | migrations e banco local  | dependência de desenvolvimento fixada e execução por scripts npm    |
 | Vercel         | hospedagem futura         | plataforma alinhada ao Next.js; nenhum deploy foi realizado         |
 
 As versões exatas ficam fixadas em `package.json` e `package-lock.json`.
@@ -150,8 +152,25 @@ existir apenas como variáveis de servidor no ambiente local e na Vercel.
 
 O pacote `@supabase/supabase-js` está instalado com versão fixa. A fábrica em
 `src/data/supabase/client.ts` cria sob demanda apenas o cliente de navegador com
-URL e chave publicável validadas. Nenhum projeto remoto, tabela, migration,
-política RLS, autenticação ou consulta foi criado.
+URL e chave publicável validadas. O modelo local versionado contém Proprietário,
+Biblioteca, Livro, Solicitação e Empréstimo. Cada Proprietário referencia
+exatamente um `auth.users.id`, e RLS propaga essa identidade pela Biblioteca,
+pelos Livros e pelos registros relacionados.
+
+O papel `authenticated` recebe operações de tabela, mas as policies limitam
+cada linha à Biblioteca vinculada a `auth.uid()`. O papel `anon` não recebe
+acesso direto às tabelas. A futura página pública deverá usar somente as RPCs
+que localizam uma Biblioteca por `identificador_publico`, listam os campos
+públicos de Livros disponíveis e criam uma Solicitação pendente válida.
+
+Essas RPCs são `SECURITY DEFINER` porque `anon` não possui privilégios nas
+tabelas subjacentes. Todas fixam `search_path` vazio, qualificam schemas,
+revogam o `EXECUTE` padrão e concedem execução somente a `anon`. Nenhuma view
+pública foi criada, evitando uma superfície enumerável e a exposição acidental
+de colunas privadas.
+
+Nenhum projeto remoto, autenticação funcional ou consulta da interface foi
+criado.
 
 O cliente de servidor e o gerenciamento de cookies serão definidos na Etapa 6,
 quando o fluxo de autenticação for implementado. A modelagem e as políticas RLS
@@ -170,17 +189,22 @@ Nenhum projeto Vercel, recurso remoto ou deploy foi criado nesta etapa.
 
 ## Qualidade e comandos
 
-| Comando                | Finalidade                                 |
-| ---------------------- | ------------------------------------------ |
-| `npm run dev`          | servidor local com recarga                 |
-| `npm run lint`         | análise estática                           |
-| `npm run format`       | aplica formatação                          |
-| `npm run format:check` | confere formatação sem alterar arquivos    |
-| `npm run typecheck`    | valida tipos sem emitir arquivos           |
-| `npm run test`         | executa os testes automatizados            |
-| `npm run build`        | gera o build de produção                   |
-| `npm run start`        | inicia o build de produção                 |
-| `npm run validate`     | executa todas as verificações em sequência |
+| Comando                              | Finalidade                                 |
+| ------------------------------------ | ------------------------------------------ |
+| `npm run dev`                        | servidor local com recarga                 |
+| `npm run lint`                       | análise estática                           |
+| `npm run format`                     | aplica formatação                          |
+| `npm run format:check`               | confere formatação sem alterar arquivos    |
+| `npm run typecheck`                  | valida tipos sem emitir arquivos           |
+| `npm run test`                       | executa os testes automatizados            |
+| `npm run db:start`                   | inicia o stack Supabase local              |
+| `npm run db:stop`                    | encerra o stack Supabase local             |
+| `npm run db:reset`                   | recria o banco local pelas migrations      |
+| `npm run db:migration:new -- <nome>` | cria uma migration versionada              |
+| `npm run db:migrations:list`         | confere o histórico local de migrations    |
+| `npm run build`                      | gera o build de produção                   |
+| `npm run start`                      | inicia o build de produção                 |
+| `npm run validate`                   | executa todas as verificações em sequência |
 
 ## Decisões técnicas
 
@@ -196,12 +220,13 @@ Nenhum projeto Vercel, recurso remoto ou deploy foi criado nesta etapa.
   fazem chamadas externas.
 - **Dependências fixadas e lockfile:** tornam instalações reprodutíveis.
 - **Sem Tailwind ou biblioteca visual:** decisões visuais pertencem à Etapa 4.
-- **Sem Supabase CLI nesta etapa:** schema e migrations pertencem à Etapa 5.
+- **Supabase CLI local e fixada:** adicionada na Tarefa 5.1 para que configuração
+  e migrations sejam reproduzíveis pela versão registrada no lockfile.
 
 ## Limitações e pendências
 
 - Design System, tokens, layouts e componentes visuais: Etapa 4.
-- Modelo de dados, migrations, RLS e tipos gerados: Etapa 5.
+- Tipos gerados do banco: etapa futura quando a integração funcional exigir.
 - Cliente Supabase de servidor, cookies, sessão e proteção de rotas: Etapa 6.
 - Catálogo, Google Books, página pública, QR Code, solicitações, empréstimos e
   devoluções: etapas funcionais posteriores.
@@ -209,6 +234,11 @@ Nenhum projeto Vercel, recurso remoto ou deploy foi criado nesta etapa.
 
 ## Histórico de decisões
 
-| Etapa | Registro                                                                                                                                    |
-| ----- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| 3     | Next.js, React, TypeScript, Supabase e Vercel confirmados; estrutura modular, configuração segura e ferramentas de qualidade implementadas. |
+| Etapa | Registro                                                                                                                                                 |
+| ----- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 3     | Next.js, React, TypeScript, Supabase e Vercel confirmados; estrutura modular, configuração segura e ferramentas de qualidade implementadas.              |
+| 5.1   | Supabase CLI e configuração local versionadas; migrations SQL imperativas adotadas com validação por reconstrução limpa e sem modelo de domínio.         |
+| 5.2   | Modelo iniciado com Proprietário e Biblioteca em relacionamento 1:1; autenticação, RLS, interface e entidades futuras permaneceram adiadas.              |
+| 5.3   | Catálogo persistente modelado com Livro pertencente a uma Biblioteca; interface, empréstimos, solicitações e regras transacionais permaneceram adiados.  |
+| 5.4   | Solicitação e Empréstimo modelados separadamente, com vínculos estruturais ao Livro e entre si; interface, automações e transações permaneceram adiadas. |
+| 5.5   | Proprietário vinculado a `auth.users`; RLS aplicada às cinco tabelas; acesso público reduzido a três RPCs e grants mínimos, sem integrar a interface.    |
