@@ -53,7 +53,7 @@ tabelas, rotas, tecnologias ou provedores.
 | 1 | Inspeção do repositório | Concluída |
 | 2 | Criação do plano técnico | Concluída |
 | 3 | Definição e implementação da arquitetura base | Concluída |
-| 4 | Design do Sistema (UI/UX e Design System) | Pendente |
+| 4 | Design do Sistema (UI/UX e Design System) | Concluída |
 | 5 | Modelagem do banco de dados | Pendente |
 | 6 | Autenticação | Pendente |
 | 7 | Cadastro manual de livros | Pendente |
@@ -324,7 +324,10 @@ exigir o registro de decisão arquitetural.
 pronta para ser reutilizada pelas funcionalidades futuras, sem antecipar suas
 regras de negócio.
 
-**Status atual:** **Pendente.**
+**Status atual:** **Concluída.** Design System, componentes compartilhados,
+layouts, navegação-base, responsividade e acessibilidade visual implementados,
+documentados e validados, mantendo dados e comportamentos exclusivamente
+simulados.
 
 ### Etapa 5 — Modelagem do banco de dados
 
@@ -945,17 +948,15 @@ falhas não bloqueadoras precisam de justificativa, risco e pendência registrad
 
 - As tecnologias e a arquitetura base foram definidas na Etapa 3.
 - O projeto executável e as ferramentas de qualidade foram configurados.
+- O Design System e as interfaces simuladas foram concluídos na Etapa 4.
 - O banco, as migrations e as políticas RLS ainda não foram modelados.
 - Todas as funcionalidades da SDD permanecem não implementadas.
 - A escolha/configuração de serviços externos e ambientes permanece para as
   etapas correspondentes.
 
-Essas pendências são esperadas após a conclusão da Etapa 3 e não impedem o
-início da Etapa 4 — Design do Sistema. Elas não devem ser resolvidas
-antecipadamente neste plano.
+As pendências funcionais permanecem reservadas às respectivas etapas e não foram
+antecipadas durante a Etapa 4.
 
 ## 10. Próxima etapa recomendada
 
-A próxima etapa é a **Etapa 4 — Design do Sistema (UI/UX e Design System)**.
-Ela deverá definir a base visual e os componentes reutilizáveis sem implementar
-fluxos funcionais, conforme o escopo já registrado neste plano.
+A próxima etapa é a **Etapa 5 — Modelagem do banco de dados**.

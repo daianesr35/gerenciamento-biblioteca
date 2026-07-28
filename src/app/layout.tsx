@@ -4,8 +4,11 @@ import type { ReactNode } from 'react';
 import './styles.css';
 
 export const metadata: Metadata = {
-  title: 'Gerenciamento de Biblioteca',
-  description: 'Sistema de gerenciamento de biblioteca pessoal',
+  title: {
+    default: 'Minha Biblioteca',
+    template: '%s | Minha Biblioteca',
+  },
+  description: 'Organize sua biblioteca pessoal e seus empréstimos.',
 };
 
 type RootLayoutProps = Readonly<{
