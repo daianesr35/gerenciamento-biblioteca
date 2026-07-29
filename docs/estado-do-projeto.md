@@ -11,8 +11,8 @@ arquitetura base executável:
 - **Etapa 4 — Design do Sistema:** concluída em 28 de julho de 2026.
 - **Etapa 5 — Modelagem do banco de dados:** concluída; as Tarefas 5.1 a 5.5
   foram concluídas.
-- **Etapa 6 — Autenticação:** em andamento; as Tarefas 6.1, 6.2 e 6.3 foram
-  concluídas.
+- **Etapa 6 — Autenticação:** em andamento; as Tarefas 6.1, 6.2, 6.3 e 6.4
+  foram concluídas.
 
 A Tarefa 6.2 instalou `@supabase/ssr@0.12.3` e implementou a infraestrutura de
 sessão SSR: cliente de navegador, cliente de servidor por requisição, utilitário
@@ -26,9 +26,14 @@ trata sessão imediata, confirmação pendente e erros seguros. Uma migration
 incremental cria, pelo trigger de `auth.users`, exatamente um Proprietário e uma
 Biblioteca na mesma transação.
 
-O Proxy ainda não redireciona nem protege rotas. Login funcional, proteção final
-e Logout permanecem pendentes para as tarefas seguintes. Nenhuma configuração
-remota foi alterada.
+O Login funcional está disponível em `/login`. A Server Action valida E-mail e
+Senha, normaliza o e-mail e usa o mesmo cliente SSR para
+`signInWithPassword`. Credenciais válidas criam a sessão por cookies e
+redirecionam para `/dashboard`; falhas recebem mensagens seguras.
+
+O Proxy ainda não redireciona nem protege rotas. Proteção final e Logout
+permanecem pendentes para as tarefas seguintes. Nenhuma configuração remota foi
+alterada.
 
 O repositório possui uma aplicação Next.js tipada e preparada para evolução
 modular. A implementação consolidada da Etapa 4 inclui as dez telas principais,
@@ -43,9 +48,9 @@ obrigatório com Biblioteca. Solicitações e Empréstimos possuem estados, data
 relacionamentos com Livro e vínculo opcional entre si. RLS está habilitada nas
 cinco tabelas, o vínculo único com `auth.users` sustenta o isolamento privado e
 o acesso anônimo está restrito a três RPCs mínimas, sem acesso direto às
-tabelas. O Cadastro é o primeiro fluxo conectado ao Auth e ao banco; as telas de
-domínio continuam simuladas. Login funcional, integração com a Google Books, QR
-Code funcional e recursos remotos não foram criados. Login, Dashboard,
+tabelas. Cadastro e Login estão conectados ao Auth; as telas de domínio
+continuam simuladas. Integração com a Google Books, QR Code funcional e recursos
+remotos não foram criados. Login, Dashboard,
 Biblioteca, Cadastro de Livro, Detalhes do Livro, Solicitações, Empréstimos,
 Configurações, Perfil e Página Pública passaram pela revisão visual específica e
 pela consolidação final de consistência, navegação, responsividade e
@@ -186,7 +191,8 @@ adiadas e permanecem pendentes.
 ## Pendências
 
 - Manter as telas auxiliares adiadas para etapa posterior.
-- Iniciar a Tarefa 6.4 — Login somente mediante autorização específica.
+- Iniciar a Tarefa 6.5 — Restauração de sessão e proteção de rotas somente
+  mediante autorização específica.
 - Implementar e validar as funcionalidades definitivas previstas na SDD durante
   suas respectivas etapas.
 - Preparar testes integrados e deploy nas respectivas etapas.
@@ -235,10 +241,30 @@ schema não encontrou erros.
 Não foram implementados Login, proteção final, Logout ou recursos de tarefas
 posteriores. Não houve conexão ou alteração de banco remoto.
 
+## Conclusão da Tarefa 6.4
+
+A rota `/login` passou a usar a Server Action `loginAction`, que repete a
+validação no servidor e delega ao serviço e ao adaptador existentes. O adaptador
+usa o cliente SSR por requisição para chamar `signInWithPassword`, sem criar
+outro cliente ou manipular cookies manualmente.
+
+O fluxo exige e-mail válido e senha presente. O e-mail é normalizado antes da
+autenticação. Credenciais válidas criam a sessão e encaminham a interface para
+`/dashboard`; credenciais inválidas e falhas inesperadas são convertidas em
+categorias internas e mensagens genéricas. O botão permanece desabilitado
+durante a submissão.
+
+Os testes indispensáveis cobrem Login válido, senha inválida, e-mail inválido,
+erro normalizado, validação da Server Action e chamada correta de
+`signInWithPassword`. O Login não consulta, cria ou repara Proprietário ou
+Biblioteca: contas criadas pela Tarefa 6.3 já são provisionadas atomicamente.
+
+Não foram implementados proteção de rotas, restauração completa da sessão,
+identidade real no AppShell, Logout ou qualquer recurso posterior. Não houve
+conexão ou alteração de banco remoto.
+
 ## Próxima etapa recomendada
 
-**Tarefa 6.4 — Login.**
+**Tarefa 6.5 — Restauração de sessão e proteção de rotas.**
 
-A próxima tarefa deverá integrar a tela de Login existente a
-`signInWithPassword`, reutilizando a infraestrutura SSR e validando o
-provisionamento completo sem criar ou reparar silenciosamente dados ausentes.
+A próxima tarefa deverá ser iniciada somente mediante autorização específica.

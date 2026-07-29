@@ -1,9 +1,15 @@
 'use client';
 
-import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useActionState, useEffect } from 'react';
+import { useFormStatus } from 'react-dom';
 
 import { Button, Input } from '@/components/ui';
+import type { LoginActionState } from '@/types/auth';
+
+import { loginAction } from './actions';
+
+const INITIAL_STATE: LoginActionState = { status: 'idle' };
 
 function BookIcon() {
   return (
@@ -47,9 +53,50 @@ function BenefitIcon({ type }: { type: 'loans' | 'security' }) {
   );
 }
 
+function SubmitButton() {
+  const { pending } = useFormStatus();
+
+  return (
+    <Button disabled={pending} type="submit" variant="primary">
+      <FieldIcon type="password" />
+      {pending ? 'Entrando…' : 'Entrar'}
+    </Button>
+  );
+}
+
+function loginMessage(state: LoginActionState): string | null {
+  if (state.status === 'invalid') {
+    const emailRequired = state.fieldErrors.email === 'Informe seu e-mail.';
+    const passwordRequired =
+      state.fieldErrors.password === 'Informe sua senha.';
+
+    if (emailRequired && passwordRequired) {
+      return 'E-mail e senha são obrigatórios.';
+    }
+
+    return state.fieldErrors.email ?? state.fieldErrors.password ?? null;
+  }
+
+  if (state.status === 'error') {
+    return state.category === 'invalid_credentials'
+      ? 'E-mail ou senha inválidos.'
+      : 'Não foi possível entrar. Tente novamente.';
+  }
+
+  return null;
+}
+
 export default function LoginPage() {
   const router = useRouter();
-  const [errors, setErrors] = useState({ email: false, password: false });
+  const [state, formAction] = useActionState(loginAction, INITIAL_STATE);
+  const message = loginMessage(state);
+  const fieldErrors = state.status === 'invalid' ? state.fieldErrors : {};
+
+  useEffect(() => {
+    if (state.status === 'authenticated') {
+      router.replace('/dashboard');
+    }
+  }, [router, state.status]);
 
   return (
     <main className="login-page">
@@ -81,27 +128,7 @@ export default function LoginPage() {
         </div>
       </section>
       <section className="login-panel" aria-labelledby="login-title">
-        <form
-          className="login-form"
-          noValidate
-          onSubmit={(event) => {
-            event.preventDefault();
-            const form = event.currentTarget;
-            const email = form.elements.namedItem('email') as HTMLInputElement;
-            const password = form.elements.namedItem(
-              'password',
-            ) as HTMLInputElement;
-            const nextErrors = {
-              email: !email.validity.valid,
-              password: !password.validity.valid,
-            };
-
-            setErrors(nextErrors);
-            if (!nextErrors.email && !nextErrors.password) {
-              router.push('/dashboard');
-            }
-          }}
-        >
+        <form action={formAction} className="login-form">
           <div className="login-brand">
             <BookIcon />
             <h1 id="login-title">Minha Biblioteca</h1>
@@ -110,13 +137,10 @@ export default function LoginPage() {
           <div className="login-field">
             <FieldIcon type="email" />
             <Input
-              error={errors.email ? 'Informe um e-mail válido.' : undefined}
+              autoComplete="email"
+              error={fieldErrors.email}
               label="E-mail"
               name="email"
-              onChange={() =>
-                errors.email &&
-                setErrors((current) => ({ ...current, email: false }))
-              }
               placeholder="seu@email.com"
               required
               type="email"
@@ -125,31 +149,25 @@ export default function LoginPage() {
           <div className="login-field">
             <FieldIcon type="password" />
             <Input
-              error={errors.password ? 'Informe sua senha.' : undefined}
+              autoComplete="current-password"
+              error={fieldErrors.password}
               label="Senha"
-              minLength={1}
               name="password"
-              onChange={() =>
-                errors.password &&
-                setErrors((current) => ({ ...current, password: false }))
-              }
               placeholder="Sua senha"
               required
               type="password"
             />
           </div>
-          <p className="forgot-password">
-            <a className="muted" href="#recuperacao-indisponivel">
-              Esqueceu sua senha?
-            </a>
-          </p>
-          <Button type="submit" variant="primary">
-            <FieldIcon type="password" />
-            Entrar
-          </Button>
-          <p className="sr-only" id="recuperacao-indisponivel">
-            A recuperação de senha estará disponível em uma etapa posterior.
-          </p>
+          {message && (
+            <p
+              aria-live="polite"
+              className="registration-message error"
+              role="alert"
+            >
+              {message}
+            </p>
+          )}
+          <SubmitButton />
         </form>
       </section>
     </main>

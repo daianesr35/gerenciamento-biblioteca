@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import {
   hasRequiredValue,
+  loginOwner,
   normalizeAuthError,
   normalizeEmail,
   normalizeName,
@@ -159,6 +160,73 @@ describe('cadastro de proprietário', () => {
     ).resolves.toEqual({
       status: 'error',
       category: 'invalid_signup',
+    });
+  });
+});
+
+describe('login de proprietário', () => {
+  it('normaliza o e-mail e autentica credenciais válidas', async () => {
+    const signIn = vi.fn(async () => undefined);
+
+    await expect(
+      loginOwner(
+        {
+          email: ' MARIA@EXAMPLE.COM ',
+          password: 'senha-segura',
+        },
+        signIn,
+      ),
+    ).resolves.toEqual({ status: 'authenticated' });
+    expect(signIn).toHaveBeenCalledWith({
+      email: 'maria@example.com',
+      password: 'senha-segura',
+    });
+  });
+
+  it('rejeita e-mail inválido antes de chamar o provedor', async () => {
+    const signIn = vi.fn();
+
+    await expect(
+      loginOwner({ email: 'maria@', password: 'senha-segura' }, signIn),
+    ).resolves.toEqual({
+      status: 'invalid',
+      fieldErrors: { email: 'Informe um e-mail válido.' },
+    });
+    expect(signIn).not.toHaveBeenCalled();
+  });
+
+  it('normaliza senha inválida sem expor detalhes do provedor', async () => {
+    const signIn = vi.fn(async () => {
+      throw {
+        code: 'invalid_credentials',
+        message: 'Invalid login credentials',
+      };
+    });
+
+    await expect(
+      loginOwner(
+        { email: 'maria@example.com', password: 'senha-incorreta' },
+        signIn,
+      ),
+    ).resolves.toEqual({
+      status: 'error',
+      category: 'invalid_credentials',
+    });
+  });
+
+  it('normaliza erro inesperado sem expor a mensagem original', async () => {
+    const signIn = vi.fn(async () => {
+      throw new Error('detalhe técnico sensível');
+    });
+
+    await expect(
+      loginOwner(
+        { email: 'maria@example.com', password: 'senha-segura' },
+        signIn,
+      ),
+    ).resolves.toEqual({
+      status: 'error',
+      category: 'unknown',
     });
   });
 });

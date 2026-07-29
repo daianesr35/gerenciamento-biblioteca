@@ -1,5 +1,9 @@
 import { createSupabaseServerClient } from '@/data/supabase/server';
-import type { AuthIdentityResult, RegistrationInput } from '@/types/auth';
+import type {
+  AuthIdentityResult,
+  LoginInput,
+  RegistrationInput,
+} from '@/types/auth';
 
 export async function getServerAuthIdentity(): Promise<AuthIdentityResult> {
   const supabase = await createSupabaseServerClient();
@@ -47,4 +51,16 @@ export async function signUpOwner(
   return {
     hasSession: data.session !== null,
   };
+}
+
+export async function signInOwner(input: LoginInput): Promise<void> {
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase.auth.signInWithPassword({
+    email: input.email,
+    password: input.password,
+  });
+
+  if (error) {
+    throw error;
+  }
 }

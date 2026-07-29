@@ -2877,24 +2877,6 @@ h3 {
   color: #85807d;
 }
 
-.forgot-password {
-  margin: -6px 0 30px;
-  text-align: right;
-}
-
-.forgot-password a {
-  color: #174784;
-  font-size: 14px;
-  font-weight: 700;
-  text-decoration: underline;
-  text-decoration-color: transparent;
-  text-underline-offset: 3px;
-}
-
-.forgot-password a:hover {
-  text-decoration-color: currentcolor;
-}
-
 .login-form .button {
   width: 100%;
   min-height: 60px;
@@ -4498,10 +4480,6 @@ h3 {
 
   .login-field > svg {
     top: 38px;
-  }
-
-  .forgot-password {
-    margin: -2px 0 18px;
   }
 
   .login-form .button {

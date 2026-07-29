@@ -68,3 +68,26 @@ export type RegistrationResult =
 export type RegistrationActionState =
   | Readonly<{ status: 'idle' }>
   | RegistrationResult;
+
+export type LoginInput = Readonly<{
+  email: string;
+  password: string;
+}>;
+
+export type LoginFieldErrors = Readonly<{
+  email?: string;
+  password?: string;
+}>;
+
+export type LoginResult =
+  | Readonly<{ status: 'authenticated' }>
+  | Readonly<{
+      status: 'invalid';
+      fieldErrors: LoginFieldErrors;
+    }>
+  | Readonly<{
+      status: 'error';
+      category: AuthErrorCategory;
+    }>;
+
+export type LoginActionState = Readonly<{ status: 'idle' }> | LoginResult;

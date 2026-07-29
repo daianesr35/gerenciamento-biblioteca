@@ -755,3 +755,45 @@ O reset local aplicou as cinco migrations em ordem. Os dois testes SQL, o lint
 do schema e a listagem local de migrations foram aprovados. Login funcional,
 proteção final de rotas, Logout e tarefas posteriores continuam fora do escopo.
 A próxima tarefa é a **Tarefa 6.4 — Login**.
+
+## 15. Implementação da Tarefa 6.4
+
+### Login e sessão
+
+A rota `/login` usa a Server Action `loginAction`. A action lê E-mail e Senha,
+repete a validação no servidor e delega ao serviço de autenticação. O serviço
+reutiliza as validações existentes para exigir e normalizar o e-mail e exige
+somente a presença da senha.
+
+O adaptador `signInOwner`, em `src/data/supabase/auth.ts`, cria o cliente SSR de
+servidor já existente e chama `signInWithPassword` com E-mail e Senha. A
+infraestrutura SSR persiste a sessão por cookies; não existe cliente paralelo,
+armazenamento manual de tokens ou manipulação adicional de cookies.
+
+Quando a autenticação é concluída, a interface substitui a rota atual por
+`/dashboard`. Durante a submissão, o botão fica desabilitado e apresenta o
+estado `Entrando…`.
+
+### Validação e erros
+
+Campos ausentes e e-mail inválido são rejeitados antes da chamada ao Supabase.
+O código `invalid_credentials` é apresentado somente como “E-mail ou senha
+inválidos.”. Qualquer outra categoria recebe “Não foi possível entrar. Tente
+novamente.”. Mensagens, tokens e detalhes internos do Supabase não chegam à
+interface.
+
+O escopo MVP autorizado não adiciona consulta de provisionamento ao Login.
+Contas criadas pela Tarefa 6.3 já possuem Proprietário e Biblioteca por
+provisionamento atômico; o Login não cria, repara ou altera esses registros.
+
+### Testes e limites
+
+Os testes indispensáveis cobrem credenciais válidas, senha inválida, e-mail
+inválido, erro normalizado, validação da Server Action e chamada exata de
+`signInWithPassword`. A suíte permanece unitária e não depende de conexão
+remota com o Supabase.
+
+Proteção e restauração completa da sessão, matriz de redirecionamentos,
+parâmetro `next`, identidade real no AppShell, Logout, recuperação de senha e
+recursos posteriores não foram implementados. A próxima tarefa é a **Tarefa 6.5
+— Restauração de sessão e proteção de rotas**.

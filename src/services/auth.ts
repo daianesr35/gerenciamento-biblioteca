@@ -1,6 +1,8 @@
 import type {
   AuthErrorCategory,
   AuthValidationResult,
+  LoginInput,
+  LoginResult,
   NormalizedAuthError,
   RegistrationInput,
   RegistrationResult,
@@ -134,6 +136,45 @@ export async function registerOwner(
     return {
       status: result.hasSession ? 'authenticated' : 'confirmation_required',
     };
+  } catch (error) {
+    return {
+      status: 'error',
+      category: normalizeAuthError(error).category,
+    };
+  }
+}
+
+type SignIn = (input: LoginInput) => Promise<void>;
+
+export async function loginOwner(
+  input: LoginInput,
+  signIn: SignIn,
+): Promise<LoginResult> {
+  const email = validateEmail(input.email);
+  const hasPassword = hasRequiredValue(input.password);
+  const fieldErrors = {
+    ...(!email.valid && {
+      email:
+        email.error === 'invalid_email'
+          ? 'Informe um e-mail válido.'
+          : 'Informe seu e-mail.',
+    }),
+    ...(!hasPassword && {
+      password: 'Informe sua senha.',
+    }),
+  };
+
+  if (!email.valid || !hasPassword) {
+    return { status: 'invalid', fieldErrors };
+  }
+
+  try {
+    await signIn({
+      email: email.value,
+      password: input.password,
+    });
+
+    return { status: 'authenticated' };
   } catch (error) {
     return {
       status: 'error',

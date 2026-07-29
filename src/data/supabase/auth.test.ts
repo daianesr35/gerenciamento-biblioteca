@@ -6,7 +6,7 @@ vi.mock('@/data/supabase/server', () => ({
   createSupabaseServerClient,
 }));
 
-import { getServerAuthIdentity, signUpOwner } from './auth';
+import { getServerAuthIdentity, signInOwner, signUpOwner } from './auth';
 
 beforeEach(() => {
   createSupabaseServerClient.mockReset();
@@ -121,5 +121,50 @@ describe('identidade autenticada no servidor', () => {
       status: 'anonymous',
       identity: null,
     });
+  });
+});
+
+describe('login no Supabase Auth', () => {
+  it('chama signInWithPassword com e-mail e senha', async () => {
+    const signInWithPassword = vi.fn(async () => ({
+      data: { user: { id: 'user-id' }, session: {} },
+      error: null,
+    }));
+    createSupabaseServerClient.mockResolvedValue({
+      auth: { signInWithPassword },
+    });
+
+    await expect(
+      signInOwner({
+        email: 'maria@example.com',
+        password: 'senha-segura',
+      }),
+    ).resolves.toBeUndefined();
+    expect(signInWithPassword).toHaveBeenCalledWith({
+      email: 'maria@example.com',
+      password: 'senha-segura',
+    });
+  });
+
+  it('preserva o erro para normalização pelo serviço', async () => {
+    const providerError = {
+      code: 'invalid_credentials',
+      message: 'Invalid login credentials',
+    };
+    createSupabaseServerClient.mockResolvedValue({
+      auth: {
+        signInWithPassword: vi.fn(async () => ({
+          data: { user: null, session: null },
+          error: providerError,
+        })),
+      },
+    });
+
+    await expect(
+      signInOwner({
+        email: 'maria@example.com',
+        password: 'senha-incorreta',
+      }),
+    ).rejects.toBe(providerError);
   });
 });
