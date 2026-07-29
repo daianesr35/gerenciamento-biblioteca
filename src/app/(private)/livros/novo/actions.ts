@@ -4,7 +4,9 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
 import { createOwnBook } from '@/services/books';
+import { lookupGoogleBookByIsbn } from '@/services/google-books';
 import type { CreateBookActionState } from '@/types/books';
+import type { GoogleBooksLookupResult } from '@/types/google-books';
 
 function readFormValue(formData: FormData, field: string): string {
   const value = formData.get(field);
@@ -29,4 +31,10 @@ export async function createBookAction(
 
   revalidatePath('/biblioteca');
   redirect('/biblioteca');
+}
+
+export async function lookupGoogleBookAction(
+  isbn: string,
+): Promise<GoogleBooksLookupResult> {
+  return lookupGoogleBookByIsbn(isbn);
 }

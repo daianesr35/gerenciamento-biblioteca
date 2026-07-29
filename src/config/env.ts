@@ -9,6 +9,10 @@ type SupabaseEnvironment = Readonly<{
   supabasePublishableKey: string;
 }>;
 
+type GoogleBooksEnvironment = Readonly<{
+  apiKey: string;
+}>;
+
 function required(name: string, value: string | undefined): string {
   if (!value) {
     throw new Error(`Variável de ambiente obrigatória ausente: ${name}`);
@@ -34,5 +38,11 @@ export function getPublicEnvironment(): PublicEnvironment {
   return {
     appUrl: required('NEXT_PUBLIC_APP_URL', process.env.NEXT_PUBLIC_APP_URL),
     ...getSupabaseEnvironment(),
+  };
+}
+
+export function getGoogleBooksEnvironment(): GoogleBooksEnvironment {
+  return {
+    apiKey: required('GOOGLE_BOOKS_API_KEY', process.env.GOOGLE_BOOKS_API_KEY),
   };
 }

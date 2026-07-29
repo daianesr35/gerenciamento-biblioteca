@@ -478,3 +478,23 @@ confirmação e cancelamento, a exclusão real e o redirecionamento para
 
 A Etapa 7 permanece em andamento. A próxima tarefa é a Tarefa 7.8 —
 Encerramento e validação do CRUD.
+
+## Conclusão da Tarefa 8.2
+
+A infraestrutura server-side de consulta por ISBN na Google Books foi
+implementada sem integração com o formulário. A configuração privada,
+contratos, adaptador HTTP com `fetch` nativo e timeout, service de normalização
+e mapeamento, Server Action exclusiva e testes unitários estão disponíveis.
+
+O MVP remove espaços e hífens do ISBN e valida somente o comprimento de 10 ou
+13 caracteres, sem checksum. A consulta solicita um único resultado e usa o
+primeiro volume retornado. Somente título, autores, ISBN, editora e URL da capa
+são mapeados; dados ausentes permanecem vazios.
+
+ISBN inválido, livro não encontrado, erro HTTP, rede, timeout e resposta
+inesperada produzem resultados padronizados. A consulta não acessa Supabase,
+não cria ou altera registros, não chama `createOwnBook`, não revalida páginas e
+não redireciona.
+
+A integração visual e o preenchimento editável do formulário permanecem
+exclusivamente para a Tarefa 8.3.

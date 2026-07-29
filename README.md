@@ -94,12 +94,14 @@ O arquivo `.env.local` utiliza estas variáveis:
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
 NEXT_PUBLIC_APP_URL=http://localhost:3000
+GOOGLE_BOOKS_API_KEY=
 ```
 
 Não use os valores ilustrativos de `.env.example` para executar o ambiente
 local. A URL e a chave pública corretas serão exibidas ao iniciar o Supabase no
 próximo passo. Não registre `.env.local` no Git e nunca use uma chave
-`service_role` ou outra chave secreta no navegador.
+`service_role` ou outra chave secreta no navegador. `GOOGLE_BOOKS_API_KEY` deve
+ser uma chave habilitada para a Books API e é lida somente no servidor.
 
 ### 5. Iniciar o Docker Desktop
 
@@ -229,7 +231,7 @@ equipe.
 
 ### Variáveis de ambiente ausentes
 
-Confirme que `.env.local` existe e contém as três variáveis descritas em
+Confirme que `.env.local` existe e contém as quatro variáveis descritas em
 `.env.example`. Depois de corrigir o arquivo, reinicie `npm run dev`.
 
 ### Dependências não instaladas

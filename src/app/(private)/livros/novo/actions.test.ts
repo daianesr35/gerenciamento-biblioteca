@@ -1,19 +1,60 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const createOwnBook = vi.hoisted(() => vi.fn());
+const lookupGoogleBookByIsbn = vi.hoisted(() => vi.fn());
 const revalidatePath = vi.hoisted(() => vi.fn());
 const redirect = vi.hoisted(() => vi.fn());
 
 vi.mock('@/services/books', () => ({ createOwnBook }));
+vi.mock('@/services/google-books', () => ({ lookupGoogleBookByIsbn }));
 vi.mock('next/cache', () => ({ revalidatePath }));
 vi.mock('next/navigation', () => ({ redirect }));
 
-import { createBookAction } from './actions';
+import { createBookAction, lookupGoogleBookAction } from './actions';
 
 beforeEach(() => {
   createOwnBook.mockReset();
+  lookupGoogleBookByIsbn.mockReset();
   revalidatePath.mockReset();
   redirect.mockReset();
+});
+
+describe('Server Action de consulta por ISBN', () => {
+  it('delega exclusivamente ao service e retorna o resultado', async () => {
+    const success = {
+      status: 'success',
+      book: {
+        title: 'Livro',
+        author: 'Autora',
+        isbn: '9781234567890',
+        publisher: 'Editora',
+        coverImageUrl: '',
+      },
+    };
+    lookupGoogleBookByIsbn.mockResolvedValue(success);
+
+    await expect(lookupGoogleBookAction('978-1234567890')).resolves.toEqual(
+      success,
+    );
+    expect(lookupGoogleBookByIsbn).toHaveBeenCalledWith('978-1234567890');
+    expect(createOwnBook).not.toHaveBeenCalled();
+    expect(revalidatePath).not.toHaveBeenCalled();
+    expect(redirect).not.toHaveBeenCalled();
+  });
+
+  it('preserva o erro padronizado sem efeitos colaterais', async () => {
+    const error = {
+      status: 'error',
+      category: 'timeout',
+      message: 'A consulta demorou mais que o esperado. Tente novamente.',
+    };
+    lookupGoogleBookByIsbn.mockResolvedValue(error);
+
+    await expect(lookupGoogleBookAction('1234567890')).resolves.toEqual(error);
+    expect(createOwnBook).not.toHaveBeenCalled();
+    expect(revalidatePath).not.toHaveBeenCalled();
+    expect(redirect).not.toHaveBeenCalled();
+  });
 });
 
 describe('Server Action de cadastro de Livro', () => {

@@ -142,17 +142,30 @@ de acesso.
 
 Variáveis atuais:
 
-| Variável                               | Exposição | Uso                         |
-| -------------------------------------- | --------- | --------------------------- |
-| `NEXT_PUBLIC_APP_URL`                  | pública   | URL canônica do ambiente    |
-| `NEXT_PUBLIC_SUPABASE_URL`             | pública   | URL do projeto Supabase     |
-| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | pública   | chave publicável do cliente |
+| Variável                               | Exposição | Uso                          |
+| -------------------------------------- | --------- | ---------------------------- |
+| `NEXT_PUBLIC_APP_URL`                  | pública   | URL canônica do ambiente     |
+| `NEXT_PUBLIC_SUPABASE_URL`             | pública   | URL do projeto Supabase      |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | pública   | chave publicável do cliente  |
+| `GOOGLE_BOOKS_API_KEY`                 | servidor  | consultas à Google Books API |
 
-A chave `service_role`, chaves secretas do Supabase e tokens de provedores não
-fazem parte desta configuração. Quando necessários em etapas futuras, deverão
-existir apenas como variáveis de servidor no ambiente local e na Vercel.
+A chave `service_role` e chaves secretas do Supabase não fazem parte desta
+configuração. `GOOGLE_BOOKS_API_KEY` não usa o prefixo `NEXT_PUBLIC_` e deve
+existir apenas no ambiente do servidor local e da Vercel.
 
 ## Integrações externas
+
+### Google Books
+
+A consulta por ISBN é executada no servidor por uma Server Action exclusiva.
+O service remove espaços e hífens, aceita somente valores com 10 ou 13
+caracteres e usa o primeiro volume retornado. O adaptador usa `fetch` nativo,
+limite de um resultado e timeout de cinco segundos. A resposta interna contém
+somente título, autores, ISBN, editora e URL da capa.
+
+Falhas de validação, ausência, HTTP, rede, timeout e resposta inesperada são
+normalizadas. A consulta não acessa o Supabase, não persiste dados, não revalida
+rotas e não redireciona.
 
 ### Supabase
 
