@@ -13,8 +13,8 @@ arquitetura base executável:
   foram concluídas.
 - **Etapa 6 — Autenticação:** em andamento; as Tarefas 6.1, 6.2, 6.3, 6.4 e
   6.5 foram concluídas.
-- **Etapa 7 — Cadastro manual de livros:** em andamento; as Tarefas 7.1, 7.2 e
-  7.3 foram concluídas.
+- **Etapa 7 — Cadastro manual de livros:** em andamento; as Tarefas 7.1, 7.2,
+  7.3 e 7.4 foram concluídas.
 
 A Tarefa 6.2 instalou `@supabase/ssr@0.12.3` e implementou a infraestrutura de
 sessão SSR: cliente de navegador, cliente de servidor por requisição, utilitário
@@ -357,3 +357,27 @@ O `BookCard` permanece compatível com os mocks usados pelo Dashboard. O arquivo
 de mocks foi preservado, e as demais páginas continuam simuladas. Nenhuma
 mutação, migration, policy ou cliente Supabase de navegador foi criado. A Etapa
 7 continua em andamento, e a próxima tarefa é a Tarefa 7.4 — Cadastro manual.
+
+## Conclusão da Tarefa 7.4
+
+A rota privada `/livros/novo` foi conectada ao cadastro manual real por Server
+Action. O formulário aceita somente título e autor obrigatórios, além de ISBN,
+editora e URL da capa opcionais. Os valores são normalizados e validados no
+servidor; campos opcionais vazios são persistidos como `null`.
+
+O service coordena a criação e converte falhas técnicas em resultado seguro. O
+adaptador reutiliza um único cliente Supabase SSR, resolve a Biblioteca
+autenticada no servidor e insere somente os campos bibliográficos permitidos e
+o `biblioteca_id` resolvido. O navegador não fornece `biblioteca_id` nem
+`situacao`; o banco mantém o default `disponivel` e a RLS permanece como
+barreira final.
+
+Após a inserção confirmada, a Server Action revalida `/biblioteca` e redireciona
+para essa listagem real, onde o Livro recém-cadastrado passa a aparecer. Busca
+por ISBN, Google Books, código de barras, prévia e campos não persistidos foram
+removidos da composição de cadastro.
+
+A rota de edição foi separada da criação e permanece sem carregamento ou
+salvamento real. Nenhuma edição, exclusão, detalhe real, migration ou policy foi
+implementada. A Etapa 7 continua em andamento, e a próxima tarefa é a Tarefa
+7.5 — Detalhes.

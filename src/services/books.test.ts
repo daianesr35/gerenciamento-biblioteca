@@ -2,7 +2,12 @@ import { describe, expect, it, vi } from 'vitest';
 
 import type { BookRow } from '@/data/supabase/books';
 
-import { getOwnBookById, listOwnBooks, mapBookRow } from './books';
+import {
+  createOwnBook,
+  getOwnBookById,
+  listOwnBooks,
+  mapBookRow,
+} from './books';
 
 const BOOK_ID = '123e4567-e89b-42d3-a456-426614174000';
 const ROW: BookRow = {
@@ -43,6 +48,91 @@ describe('mapeamento de Livro', () => {
       coverImageUrl: null,
       status: 'emprestado',
     });
+  });
+});
+
+describe('cadastro de Livro próprio', () => {
+  it('normaliza espaços e campos opcionais vazios antes de inserir', async () => {
+    const insertBook = vi.fn(async () => undefined);
+    await expect(
+      createOwnBook(
+        {
+          title: '  Livro novo  ',
+          author: '  Autora  ',
+          isbn: '  9780000000001  ',
+          publisher: '   ',
+          coverImageUrl: '',
+        },
+        insertBook,
+      ),
+    ).resolves.toEqual({ status: 'success' });
+    expect(insertBook).toHaveBeenCalledWith({
+      title: 'Livro novo',
+      author: 'Autora',
+      isbn: '9780000000001',
+      publisher: null,
+      coverImageUrl: null,
+    });
+  });
+
+  it('rejeita título e autor vazios sem chamar o adaptador', async () => {
+    const insertBook = vi.fn();
+    await expect(
+      createOwnBook(
+        {
+          title: ' ',
+          author: '',
+          isbn: null,
+          publisher: null,
+          coverImageUrl: null,
+        },
+        insertBook,
+      ),
+    ).resolves.toEqual({
+      status: 'invalid',
+      fieldErrors: {
+        title: 'Informe o título.',
+        author: 'Informe o autor.',
+      },
+    });
+    expect(insertBook).not.toHaveBeenCalled();
+  });
+
+  it('rejeita URL de capa inválida', async () => {
+    const insertBook = vi.fn();
+    await expect(
+      createOwnBook(
+        {
+          title: 'Livro',
+          author: 'Autora',
+          isbn: null,
+          publisher: null,
+          coverImageUrl: 'arquivo-local',
+        },
+        insertBook,
+      ),
+    ).resolves.toMatchObject({
+      status: 'invalid',
+      fieldErrors: { coverImageUrl: 'Informe uma URL de capa válida.' },
+    });
+    expect(insertBook).not.toHaveBeenCalled();
+  });
+
+  it('converte falha técnica em resultado seguro', async () => {
+    await expect(
+      createOwnBook(
+        {
+          title: 'Livro',
+          author: 'Autora',
+          isbn: null,
+          publisher: null,
+          coverImageUrl: null,
+        },
+        async () => {
+          throw new Error('detalhe interno');
+        },
+      ),
+    ).resolves.toEqual({ status: 'error', category: 'unavailable' });
   });
 });
 

@@ -7,6 +7,7 @@ vi.mock('@/data/supabase/server', () => ({ createSupabaseServerClient }));
 import {
   BOOK_COLUMNS,
   getAuthenticatedBookRow,
+  insertAuthenticatedBookRow,
   listAuthenticatedBookRows,
 } from './books';
 
@@ -125,5 +126,95 @@ describe('adaptador Supabase de Livros', () => {
     await expect(getAuthenticatedBookRow(BOOK_ID)).rejects.toEqual({
       code: 'book_query_unavailable',
     });
+  });
+});
+
+describe('inserção de Livro', () => {
+  function createInsertClient(insert: ReturnType<typeof vi.fn>) {
+    const from = vi.fn((table: string) =>
+      table === 'bibliotecas'
+        ? {
+            select: vi.fn(() => ({
+              limit: vi.fn(() => ({
+                maybeSingle: vi.fn(async () => ({
+                  data: { id: LIBRARY_ID },
+                  error: null,
+                })),
+              })),
+            })),
+          }
+        : { insert },
+    );
+    return { from };
+  }
+
+  it('insere somente campos permitidos na Biblioteca resolvida', async () => {
+    const insert = vi.fn(async () => ({ error: null }));
+    createSupabaseServerClient.mockResolvedValue(createInsertClient(insert));
+
+    await expect(
+      insertAuthenticatedBookRow({
+        title: 'Livro',
+        author: 'Autora',
+        isbn: null,
+        publisher: 'Editora',
+        coverImageUrl: null,
+      }),
+    ).resolves.toBeUndefined();
+
+    expect(createSupabaseServerClient).toHaveBeenCalledOnce();
+    expect(insert).toHaveBeenCalledWith({
+      biblioteca_id: LIBRARY_ID,
+      titulo: 'Livro',
+      autor: 'Autora',
+      isbn: null,
+      editora: 'Editora',
+      imagem_capa: null,
+    });
+  });
+
+  it('normaliza falha de inserção', async () => {
+    const insert = vi.fn(async () => ({
+      error: new Error('detalhe interno'),
+    }));
+    createSupabaseServerClient.mockResolvedValue(createInsertClient(insert));
+
+    await expect(
+      insertAuthenticatedBookRow({
+        title: 'Livro',
+        author: 'Autora',
+        isbn: null,
+        publisher: null,
+        coverImageUrl: null,
+      }),
+    ).rejects.toEqual({ code: 'book_insert_unavailable' });
+  });
+
+  it('interrompe a inserção quando a Biblioteca não pode ser resolvida', async () => {
+    const insert = vi.fn();
+    createSupabaseServerClient.mockResolvedValue({
+      from: vi.fn(() => ({
+        select: vi.fn(() => ({
+          limit: vi.fn(() => ({
+            maybeSingle: vi.fn(async () => ({
+              data: null,
+              error: new Error('detalhe interno'),
+            })),
+          })),
+        })),
+        insert,
+      })),
+    });
+
+    await expect(
+      insertAuthenticatedBookRow({
+        title: 'Livro',
+        author: 'Autora',
+        isbn: null,
+        publisher: null,
+        coverImageUrl: null,
+      }),
+    ).rejects.toEqual({ code: 'library_unavailable' });
+    expect(insert).not.toHaveBeenCalled();
   });
 });
