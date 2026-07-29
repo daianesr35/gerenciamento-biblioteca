@@ -701,3 +701,57 @@ Na validação final da tarefa, `npm run validate` aprovou ESLint, Prettier,
 TypeScript, 31 testes em 7 arquivos e o build de produção do Next.js.
 `git diff --check` e `npm ls @supabase/ssr @supabase/supabase-js` também foram
 aprovados.
+
+## 14. Implementação da Tarefa 6.3
+
+### Cadastro e comportamento da interface
+
+A rota `/cadastro` contém somente Nome, E-mail, Senha, ação para criar a conta,
+link para o Login e feedback acessível. O formulário usa validações nativas para
+usabilidade e a Server Action `registerAction` repete integralmente a validação
+no servidor. Submissões pendentes desabilitam o botão.
+
+O serviço normaliza nome e e-mail, exige os três campos, valida o formato do
+e-mail e aplica o mínimo local documentado de seis caracteres para a senha. O
+adaptador SSR chama `signUp` com `options.data.nome`, sem criar outro cliente e
+sem manipular cookies manualmente.
+
+Com sessão imediata, a interface segue para `/dashboard`. Sem sessão, informa
+que a confirmação de e-mail é necessária e mantém o caminho de volta ao Login.
+Erros do provedor e do provisionamento são reduzidos a categorias internas e
+mensagens genéricas, sem detalhes SQL, constraints ou confirmação indevida da
+existência de conta.
+
+### Provisionamento atômico
+
+A migration
+`20260729020113_provisionar_proprietario_e_biblioteca.sql`, criada pela
+Supabase CLI, adiciona a função
+`private.provisionar_proprietario_e_biblioteca()` e um trigger `AFTER INSERT`
+em `auth.users`.
+
+A função valida e normaliza o e-mail e o nome recebido em
+`raw_user_meta_data`, cria exatamente um Proprietário ligado por
+`usuario_auth_id` e uma Biblioteca ligada por `proprietario_id`. Os dois inserts
+participam da transação que cria o usuário Auth; uma falha interrompe e reverte
+todo o Cadastro.
+
+A função usa `SECURITY DEFINER`, `search_path` vazio e nomes totalmente
+qualificados. O schema `private` não é exposto pela API e a execução foi
+revogada de `PUBLIC`, `anon` e `authenticated`. Não há RPC pública,
+`service_role`, SQL dinâmico, senha em metadata ou autorização baseada em
+metadata.
+
+### Testes e limites
+
+Os testes TypeScript cobrem campos inválidos, entrada normalizada, metadata,
+sessão imediata, confirmação pendente e erro normalizado. Os testes SQL cobrem
+quantidade e vínculos de Proprietário/Biblioteca, separação entre dois usuários,
+nome e e-mail inválidos, rollback quando a Biblioteca falha, privilégios da
+função e preservação da RLS. A fixture anterior de RLS foi adaptada somente para
+conviver com o novo trigger.
+
+O reset local aplicou as cinco migrations em ordem. Os dois testes SQL, o lint
+do schema e a listagem local de migrations foram aprovados. Login funcional,
+proteção final de rotas, Logout e tarefas posteriores continuam fora do escopo.
+A próxima tarefa é a **Tarefa 6.4 — Login**.

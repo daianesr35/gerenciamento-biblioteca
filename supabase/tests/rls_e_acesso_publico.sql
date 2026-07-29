@@ -1,9 +1,33 @@
 begin;
 
-insert into auth.users (id, email)
+insert into auth.users (id, email, raw_user_meta_data)
 values
-  ('10000000-0000-0000-0000-000000000001', 'proprietario-a@example.test'),
-  ('10000000-0000-0000-0000-000000000002', 'proprietario-b@example.test');
+  (
+    '10000000-0000-0000-0000-000000000001',
+    'proprietario-a@example.test',
+    '{"nome":"Proprietário A"}'::jsonb
+  ),
+  (
+    '10000000-0000-0000-0000-000000000002',
+    'proprietario-b@example.test',
+    '{"nome":"Proprietário B"}'::jsonb
+  );
+
+delete from public.bibliotecas
+where proprietario_id in (
+  select id
+  from public.proprietarios
+  where usuario_auth_id in (
+    '10000000-0000-0000-0000-000000000001',
+    '10000000-0000-0000-0000-000000000002'
+  )
+);
+
+delete from public.proprietarios
+where usuario_auth_id in (
+  '10000000-0000-0000-0000-000000000001',
+  '10000000-0000-0000-0000-000000000002'
+);
 
 insert into public.proprietarios (id, usuario_auth_id, nome, email)
 values

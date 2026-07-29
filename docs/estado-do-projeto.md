@@ -11,7 +11,7 @@ arquitetura base executável:
 - **Etapa 4 — Design do Sistema:** concluída em 28 de julho de 2026.
 - **Etapa 5 — Modelagem do banco de dados:** concluída; as Tarefas 5.1 a 5.5
   foram concluídas.
-- **Etapa 6 — Autenticação:** em andamento; as Tarefas 6.1 e 6.2 foram
+- **Etapa 6 — Autenticação:** em andamento; as Tarefas 6.1, 6.2 e 6.3 foram
   concluídas.
 
 A Tarefa 6.2 instalou `@supabase/ssr@0.12.3` e implementou a infraestrutura de
@@ -20,9 +20,15 @@ do Proxy, propagação de cookies, cabeçalhos anti-cache, validação central p
 `getClaims()`, contratos mínimos e validações puras. O cliente antigo de
 `supabase-js` foi substituído para não manter estratégias concorrentes.
 
-O Proxy ainda não redireciona nem protege rotas. Cadastro, provisionamento,
-Login funcional, proteção final e Logout permanecem pendentes para as tarefas
-seguintes. Nenhuma migration, policy, grant ou configuração remota foi alterada.
+O Cadastro funcional está disponível em `/cadastro`. A Server Action valida e
+normaliza Nome, E-mail e Senha, usa o cliente SSR existente para `signUp` e
+trata sessão imediata, confirmação pendente e erros seguros. Uma migration
+incremental cria, pelo trigger de `auth.users`, exatamente um Proprietário e uma
+Biblioteca na mesma transação.
+
+O Proxy ainda não redireciona nem protege rotas. Login funcional, proteção final
+e Logout permanecem pendentes para as tarefas seguintes. Nenhuma configuração
+remota foi alterada.
 
 O repositório possui uma aplicação Next.js tipada e preparada para evolução
 modular. A implementação consolidada da Etapa 4 inclui as dez telas principais,
@@ -37,9 +43,9 @@ obrigatório com Biblioteca. Solicitações e Empréstimos possuem estados, data
 relacionamentos com Livro e vínculo opcional entre si. RLS está habilitada nas
 cinco tabelas, o vínculo único com `auth.users` sustenta o isolamento privado e
 o acesso anônimo está restrito a três RPCs mínimas, sem acesso direto às
-tabelas. Nenhuma tela foi conectada ao banco. Autenticação funcional, integração
-com a Google Books, QR Code funcional e recursos remotos não foram criados.
-Login, Dashboard,
+tabelas. O Cadastro é o primeiro fluxo conectado ao Auth e ao banco; as telas de
+domínio continuam simuladas. Login funcional, integração com a Google Books, QR
+Code funcional e recursos remotos não foram criados. Login, Dashboard,
 Biblioteca, Cadastro de Livro, Detalhes do Livro, Solicitações, Empréstimos,
 Configurações, Perfil e Página Pública passaram pela revisão visual específica e
 pela consolidação final de consistência, navegação, responsividade e
@@ -180,8 +186,7 @@ adiadas e permanecem pendentes.
 ## Pendências
 
 - Manter as telas auxiliares adiadas para etapa posterior.
-- Iniciar a Tarefa 6.3 — Cadastro, Proprietário e Biblioteca inicial somente
-  mediante autorização específica.
+- Iniciar a Tarefa 6.4 — Login somente mediante autorização específica.
 - Implementar e validar as funcionalidades definitivas previstas na SDD durante
   suas respectivas etapas.
 - Preparar testes integrados e deploy nas respectivas etapas.
@@ -211,11 +216,29 @@ papéis `authenticated` e `anon`, e terminaram os dados de teste com `rollback`.
 O lint do schema e os advisors locais de segurança e desempenho não encontraram
 problemas.
 
+## Conclusão da Tarefa 6.3
+
+A rota `/cadastro`, a Server Action, o adaptador `signUp` e o provisionamento
+atômico foram implementados. A migration
+`20260729020113_provisionar_proprietario_e_biblioteca.sql` cria uma função
+privada endurecida e um trigger `AFTER INSERT` em `auth.users`. O resultado
+obrigatório é um usuário Auth, um Proprietário e uma Biblioteca, ou nenhum
+registro em caso de falha.
+
+O fluxo com sessão imediata encaminha para `/dashboard`; o fluxo sem sessão
+orienta a confirmação do e-mail. Os testes TypeScript e SQL cobrem validações,
+metadata, ambos os resultados de sessão, erros normalizados, vínculos,
+quantidades, rollback, dois usuários, privilégios e isolamento RLS. O banco foi
+recriado desde zero, as cinco migrations foram aplicadas em ordem e o lint do
+schema não encontrou erros.
+
+Não foram implementados Login, proteção final, Logout ou recursos de tarefas
+posteriores. Não houve conexão ou alteração de banco remoto.
+
 ## Próxima etapa recomendada
 
-**Tarefa 6.3 — Cadastro, Proprietário e Biblioteca inicial.**
+**Tarefa 6.4 — Login.**
 
-A infraestrutura SSR da Tarefa 6.2 está concluída. A próxima tarefa deverá
-reutilizar os clientes e contratos existentes, criar a migration incremental de
-provisionamento somente pela CLI e implementar Cadastro sem recriar a
-infraestrutura de sessão. A Tarefa 6.3 ainda não foi iniciada.
+A próxima tarefa deverá integrar a tela de Login existente a
+`signInWithPassword`, reutilizando a infraestrutura SSR e validando o
+provisionamento completo sem criar ou reparar silenciosamente dados ausentes.

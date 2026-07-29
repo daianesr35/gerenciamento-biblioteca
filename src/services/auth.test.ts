@@ -1,12 +1,14 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import {
   hasRequiredValue,
   normalizeAuthError,
   normalizeEmail,
   normalizeName,
+  registerOwner,
   validateEmail,
   validateName,
+  validatePassword,
 } from './auth';
 
 describe('validações de autenticação', () => {
@@ -49,6 +51,17 @@ describe('validações de autenticação', () => {
     });
   });
 
+  it('rejeita senha vazia ou menor que a política local', () => {
+    expect(validatePassword('')).toEqual({
+      valid: false,
+      error: 'required',
+    });
+    expect(validatePassword('12345')).toEqual({
+      valid: false,
+      error: 'invalid_password',
+    });
+  });
+
   it('normaliza erros sem expor mensagem ou detalhes técnicos', () => {
     expect(
       normalizeAuthError({
@@ -63,6 +76,89 @@ describe('validações de autenticação', () => {
     });
     expect(normalizeAuthError({ code: 'over_request_rate_limit' })).toEqual({
       category: 'rate_limited',
+    });
+  });
+});
+
+describe('cadastro de proprietário', () => {
+  it.each([
+    {
+      input: { name: '   ', email: 'maria@example.com', password: '123456' },
+      field: 'name',
+    },
+    {
+      input: { name: 'Maria', email: 'maria@', password: '123456' },
+      field: 'email',
+    },
+    {
+      input: { name: 'Maria', email: 'maria@example.com', password: '' },
+      field: 'password',
+    },
+  ])('rejeita entrada inválida no campo $field', async ({ input, field }) => {
+    const signUp = vi.fn();
+
+    const result = await registerOwner(input, signUp);
+
+    expect(result.status).toBe('invalid');
+    expect(result).toHaveProperty(`fieldErrors.${field}`);
+    expect(signUp).not.toHaveBeenCalled();
+  });
+
+  it('normaliza entrada válida e retorna sucesso com sessão', async () => {
+    const signUp = vi.fn(async () => ({ hasSession: true }));
+
+    await expect(
+      registerOwner(
+        {
+          name: '  Maria   da Silva ',
+          email: ' MARIA@EXAMPLE.COM ',
+          password: '123456',
+        },
+        signUp,
+      ),
+    ).resolves.toEqual({ status: 'authenticated' });
+    expect(signUp).toHaveBeenCalledWith({
+      name: 'Maria da Silva',
+      email: 'maria@example.com',
+      password: '123456',
+    });
+  });
+
+  it('orienta confirmação quando o cadastro não retorna sessão', async () => {
+    const signUp = vi.fn(async () => ({ hasSession: false }));
+
+    await expect(
+      registerOwner(
+        {
+          name: 'Maria',
+          email: 'maria@example.com',
+          password: '123456',
+        },
+        signUp,
+      ),
+    ).resolves.toEqual({ status: 'confirmation_required' });
+  });
+
+  it('normaliza erro sem expor detalhes do provedor', async () => {
+    const signUp = vi.fn(async () => {
+      throw {
+        code: 'user_already_exists',
+        message: 'detalhe técnico que não deve sair do serviço',
+      };
+    });
+
+    await expect(
+      registerOwner(
+        {
+          name: 'Maria',
+          email: 'maria@example.com',
+          password: '123456',
+        },
+        signUp,
+      ),
+    ).resolves.toEqual({
+      status: 'error',
+      category: 'invalid_signup',
     });
   });
 });

@@ -13,7 +13,10 @@ export type AuthIdentityResult =
       identity: null;
     }>;
 
-export type AuthValidationError = 'required' | 'invalid_email';
+export type AuthValidationError =
+  | 'required'
+  | 'invalid_email'
+  | 'invalid_password';
 
 export type AuthValidationResult<T> =
   | Readonly<{
@@ -27,6 +30,7 @@ export type AuthValidationResult<T> =
 
 export type AuthErrorCategory =
   | 'invalid_credentials'
+  | 'invalid_signup'
   | 'email_not_confirmed'
   | 'rate_limited'
   | 'unavailable'
@@ -35,3 +39,32 @@ export type AuthErrorCategory =
 export type NormalizedAuthError = Readonly<{
   category: AuthErrorCategory;
 }>;
+
+export type RegistrationInput = Readonly<{
+  name: string;
+  email: string;
+  password: string;
+}>;
+
+export type RegistrationFieldErrors = Readonly<{
+  name?: string;
+  email?: string;
+  password?: string;
+}>;
+
+export type RegistrationResult =
+  | Readonly<{
+      status: 'authenticated' | 'confirmation_required';
+    }>
+  | Readonly<{
+      status: 'invalid';
+      fieldErrors: RegistrationFieldErrors;
+    }>
+  | Readonly<{
+      status: 'error';
+      category: AuthErrorCategory;
+    }>;
+
+export type RegistrationActionState =
+  | Readonly<{ status: 'idle' }>
+  | RegistrationResult;

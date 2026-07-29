@@ -2912,6 +2912,42 @@ h3 {
   stroke-width: 1.7;
 }
 
+.registration-form .login-brand {
+  margin-bottom: 30px;
+}
+
+.registration-message {
+  margin: -4px 0 20px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.registration-message.error {
+  color: var(--danger);
+  background: var(--danger-bg);
+}
+
+.registration-message.success {
+  color: var(--success);
+  background: var(--success-bg);
+}
+
+.registration-login-link {
+  margin: 22px 0 0;
+  text-align: center;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.registration-login-link a {
+  color: #174784;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 .public-page {
   display: grid;
   gap: 18px;
