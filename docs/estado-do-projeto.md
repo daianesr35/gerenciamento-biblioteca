@@ -11,8 +11,8 @@ arquitetura base executável:
 - **Etapa 4 — Design do Sistema:** concluída em 28 de julho de 2026.
 - **Etapa 5 — Modelagem do banco de dados:** concluída; as Tarefas 5.1 a 5.5
   foram concluídas.
-- **Etapa 6 — Autenticação:** em andamento; as Tarefas 6.1, 6.2, 6.3 e 6.4
-  foram concluídas.
+- **Etapa 6 — Autenticação:** em andamento; as Tarefas 6.1, 6.2, 6.3, 6.4 e
+  6.5 foram concluídas.
 
 A Tarefa 6.2 instalou `@supabase/ssr@0.12.3` e implementou a infraestrutura de
 sessão SSR: cliente de navegador, cliente de servidor por requisição, utilitário
@@ -22,18 +22,21 @@ do Proxy, propagação de cookies, cabeçalhos anti-cache, validação central p
 
 O Cadastro funcional está disponível em `/cadastro`. A Server Action valida e
 normaliza Nome, E-mail e Senha, usa o cliente SSR existente para `signUp` e
-trata sessão imediata, confirmação pendente e erros seguros. Uma migration
-incremental cria, pelo trigger de `auth.users`, exatamente um Proprietário e uma
-Biblioteca na mesma transação.
+trata erros seguros. Quando o provedor cria uma sessão imediata, ela é encerrada
+somente no escopo local para garantir o fluxo único Cadastro → Login. Uma
+migration incremental cria, pelo trigger de `auth.users`, exatamente um
+Proprietário e uma Biblioteca na mesma transação.
 
 O Login funcional está disponível em `/login`. A Server Action valida E-mail e
 Senha, normaliza o e-mail e usa o mesmo cliente SSR para
 `signInWithPassword`. Credenciais válidas criam a sessão por cookies e
 redirecionam para `/dashboard`; falhas recebem mensagens seguras.
 
-O Proxy ainda não redireciona nem protege rotas. Proteção final e Logout
-permanecem pendentes para as tarefas seguintes. Nenhuma configuração remota foi
-alterada.
+O Proxy restaura a sessão com a infraestrutura SSR existente e protege somente
+as rotas privadas atuais. Sem identidade válida, essas rotas seguem para
+`/login`; usuários autenticados em `/login` ou `/cadastro` seguem para
+`/dashboard`. O layout privado repete a validação antes de renderizar o
+`AppShell`. Logout permanece pendente. Nenhuma configuração remota foi alterada.
 
 O repositório possui uma aplicação Next.js tipada e preparada para evolução
 modular. A implementação consolidada da Etapa 4 inclui as dez telas principais,
@@ -191,8 +194,7 @@ adiadas e permanecem pendentes.
 ## Pendências
 
 - Manter as telas auxiliares adiadas para etapa posterior.
-- Iniciar a Tarefa 6.5 — Restauração de sessão e proteção de rotas somente
-  mediante autorização específica.
+- Iniciar a Tarefa 6.6 — Logout somente mediante autorização específica.
 - Implementar e validar as funcionalidades definitivas previstas na SDD durante
   suas respectivas etapas.
 - Preparar testes integrados e deploy nas respectivas etapas.
@@ -231,12 +233,12 @@ privada endurecida e um trigger `AFTER INSERT` em `auth.users`. O resultado
 obrigatório é um usuário Auth, um Proprietário e uma Biblioteca, ou nenhum
 registro em caso de falha.
 
-O fluxo com sessão imediata encaminha para `/dashboard`; o fluxo sem sessão
-orienta a confirmação do e-mail. Os testes TypeScript e SQL cobrem validações,
-metadata, ambos os resultados de sessão, erros normalizados, vínculos,
-quantidades, rollback, dois usuários, privilégios e isolamento RLS. O banco foi
-recriado desde zero, as cinco migrations foram aplicadas em ordem e o lint do
-schema não encontrou erros.
+Após o ajuste do requisito de navegação, todo cadastro concluído encaminha para
+`/login`. Se o Supabase criar uma sessão imediata, o adaptador a encerra com
+`signOut({ scope: 'local' })`; se não criar, nenhuma chamada de encerramento é
+feita. Os testes TypeScript e SQL cobrem validações, metadata, resultados de
+sessão, erros normalizados, vínculos, quantidades, rollback, dois usuários,
+privilégios e isolamento RLS.
 
 Não foram implementados Login, proteção final, Logout ou recursos de tarefas
 posteriores. Não houve conexão ou alteração de banco remoto.
@@ -263,8 +265,28 @@ Não foram implementados proteção de rotas, restauração completa da sessão,
 identidade real no AppShell, Logout ou qualquer recurso posterior. Não houve
 conexão ou alteração de banco remoto.
 
+## Conclusão da Tarefa 6.5
+
+O Proxy passou a usar o resultado de `getClaims()` para restaurar a sessão e
+decidir os redirecionamentos das rotas atualmente existentes. As rotas privadas
+aceitam usuários autenticados e redirecionam usuários sem identidade válida
+para `/login`. Usuários autenticados que acessam `/login` ou `/cadastro` são
+redirecionados para `/dashboard`. A raiz encaminha para Login ou Dashboard
+conforme a autenticação.
+
+O layout do grupo privado também valida a identidade pelo adaptador SSR
+existente antes de renderizar o `AppShell`, preservando uma segunda barreira
+server-side. Cookies, renovação e cabeçalhos anti-cache continuam sob
+responsabilidade da infraestrutura criada na Tarefa 6.2. Não foi criado outro
+cliente Supabase nem houve manipulação manual de cookies.
+
+Os testes indispensáveis cobrem acesso autenticado a rota privada, desvio de
+usuário não autenticado, e acesso autenticado a Login e Cadastro. Não foram
+implementados parâmetro `next`, Logout, identidade no AppShell, permissões,
+papéis ou recursos posteriores.
+
 ## Próxima etapa recomendada
 
-**Tarefa 6.5 — Restauração de sessão e proteção de rotas.**
+**Tarefa 6.6 — Logout.**
 
 A próxima tarefa deverá ser iniciada somente mediante autorização específica.

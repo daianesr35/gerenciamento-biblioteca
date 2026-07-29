@@ -48,8 +48,8 @@ describe('Server Action de cadastro', () => {
     expect(signUpOwner).not.toHaveBeenCalled();
   });
 
-  it('usa o adaptador e retorna sessão imediata', async () => {
-    signUpOwner.mockResolvedValue({ hasSession: true });
+  it('usa o adaptador e retorna cadastro concluído', async () => {
+    signUpOwner.mockResolvedValue(undefined);
 
     await expect(
       registerAction(
@@ -60,27 +60,12 @@ describe('Server Action de cadastro', () => {
           password: '123456',
         }),
       ),
-    ).resolves.toEqual({ status: 'authenticated' });
+    ).resolves.toEqual({ status: 'registered' });
     expect(signUpOwner).toHaveBeenCalledWith({
       name: 'Maria',
       email: 'maria@example.com',
       password: '123456',
     });
-  });
-
-  it('retorna orientação quando não há sessão', async () => {
-    signUpOwner.mockResolvedValue({ hasSession: false });
-
-    await expect(
-      registerAction(
-        { status: 'idle' },
-        registrationData({
-          name: 'Maria',
-          email: 'maria@example.com',
-          password: '123456',
-        }),
-      ),
-    ).resolves.toEqual({ status: 'confirmation_required' });
   });
 
   it('retorna somente erro normalizado', async () => {

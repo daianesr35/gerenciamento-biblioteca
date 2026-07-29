@@ -26,9 +26,7 @@ export async function getServerAuthIdentity(): Promise<AuthIdentityResult> {
   };
 }
 
-export async function signUpOwner(
-  input: RegistrationInput,
-): Promise<{ hasSession: boolean }> {
+export async function signUpOwner(input: RegistrationInput): Promise<void> {
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase.auth.signUp({
     email: input.email,
@@ -48,9 +46,15 @@ export async function signUpOwner(
     throw { code: 'unexpected_failure' };
   }
 
-  return {
-    hasSession: data.session !== null,
-  };
+  if (data.session) {
+    const { error: signOutError } = await supabase.auth.signOut({
+      scope: 'local',
+    });
+
+    if (signOutError) {
+      throw signOutError;
+    }
+  }
 }
 
 export async function signInOwner(input: LoginInput): Promise<void> {

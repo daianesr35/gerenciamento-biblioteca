@@ -51,10 +51,6 @@ function SubmitButton() {
 }
 
 function registrationMessage(state: RegistrationActionState): string | null {
-  if (state.status === 'confirmation_required') {
-    return 'Conta criada. Confirme seu e-mail antes de entrar.';
-  }
-
   if (state.status === 'invalid') {
     return 'Verifique os dados informados.';
   }
@@ -75,8 +71,8 @@ export function RegistrationForm() {
   const fieldErrors = state.status === 'invalid' ? state.fieldErrors : {};
 
   useEffect(() => {
-    if (state.status === 'authenticated') {
-      router.replace('/dashboard');
+    if (state.status === 'registered') {
+      router.replace('/login');
     }
   }, [router, state.status]);
 
@@ -130,10 +126,8 @@ export function RegistrationForm() {
       {message && (
         <p
           aria-live="polite"
-          className={`registration-message ${
-            state.status === 'confirmation_required' ? 'success' : 'error'
-          }`}
-          role={state.status === 'confirmation_required' ? 'status' : 'alert'}
+          className="registration-message error"
+          role="alert"
         >
           {message}
         </p>

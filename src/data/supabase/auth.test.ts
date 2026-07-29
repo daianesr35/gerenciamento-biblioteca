@@ -14,11 +14,14 @@ beforeEach(() => {
 
 describe('cadastro no Supabase Auth', () => {
   it('envia somente o nome como metadata de perfil', async () => {
+    const signOut = vi.fn(async () => ({ error: null }));
     const signUp = vi.fn(async () => ({
       data: { user: { id: 'user-id' }, session: {} },
       error: null,
     }));
-    createSupabaseServerClient.mockResolvedValue({ auth: { signUp } });
+    createSupabaseServerClient.mockResolvedValue({
+      auth: { signUp, signOut },
+    });
 
     await expect(
       signUpOwner({
@@ -26,7 +29,7 @@ describe('cadastro no Supabase Auth', () => {
         email: 'maria@example.com',
         password: '123456',
       }),
-    ).resolves.toEqual({ hasSession: true });
+    ).resolves.toBeUndefined();
     expect(signUp).toHaveBeenCalledWith({
       email: 'maria@example.com',
       password: '123456',
@@ -36,6 +39,29 @@ describe('cadastro no Supabase Auth', () => {
         },
       },
     });
+    expect(signOut).toHaveBeenCalledWith({ scope: 'local' });
+  });
+
+  it('não encerra sessão quando o cadastro não cria uma', async () => {
+    const signOut = vi.fn();
+    createSupabaseServerClient.mockResolvedValue({
+      auth: {
+        signUp: vi.fn(async () => ({
+          data: { user: { id: 'user-id' }, session: null },
+          error: null,
+        })),
+        signOut,
+      },
+    });
+
+    await expect(
+      signUpOwner({
+        name: 'Maria',
+        email: 'maria@example.com',
+        password: '123456',
+      }),
+    ).resolves.toBeUndefined();
+    expect(signOut).not.toHaveBeenCalled();
   });
 
   it('preserva o erro para normalização pelo serviço', async () => {

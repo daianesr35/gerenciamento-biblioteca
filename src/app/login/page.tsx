@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useActionState, useEffect } from 'react';
 import { useFormStatus } from 'react-dom';
@@ -168,6 +169,9 @@ export default function LoginPage() {
             </p>
           )}
           <SubmitButton />
+          <p className="registration-login-link">
+            Não tem uma conta? <Link href="/cadastro">Cadastrar Conta</Link>
+          </p>
         </form>
       </section>
     </main>

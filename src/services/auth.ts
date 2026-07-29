@@ -93,9 +93,7 @@ export function normalizeAuthError(error: unknown): NormalizedAuthError {
   return { category };
 }
 
-type SignUp = (input: RegistrationInput) => Promise<{
-  hasSession: boolean;
-}>;
+type SignUp = (input: RegistrationInput) => Promise<void>;
 
 export async function registerOwner(
   input: RegistrationInput,
@@ -127,15 +125,13 @@ export async function registerOwner(
   }
 
   try {
-    const result = await signUp({
+    await signUp({
       name: name.value,
       email: email.value,
       password: password.value,
     });
 
-    return {
-      status: result.hasSession ? 'authenticated' : 'confirmation_required',
-    };
+    return { status: 'registered' };
   } catch (error) {
     return {
       status: 'error',

@@ -9,6 +9,21 @@ type CookieUpdate = Readonly<{
   options: CookieOptions;
 }>;
 
+const VISITOR_ROUTES = new Set(['/login', '/cadastro']);
+const PRIVATE_ROUTES = new Set([
+  '/dashboard',
+  '/biblioteca',
+  '/solicitacoes',
+  '/emprestimos',
+  '/pagina-publica',
+  '/configuracoes',
+  '/perfil',
+]);
+
+function isPrivateRoute(pathname: string): boolean {
+  return PRIVATE_ROUTES.has(pathname) || pathname.startsWith('/livros/');
+}
+
 export async function updateSupabaseSession(
   request: NextRequest,
 ): Promise<NextResponse> {
@@ -17,8 +32,10 @@ export async function updateSupabaseSession(
   const responseHeaders = new Map<string, string>();
   let response = NextResponse.next({ request });
 
-  const rebuildResponse = () => {
-    response = NextResponse.next({ request });
+  const rebuildResponse = (destination?: string) => {
+    response = destination
+      ? NextResponse.redirect(new URL(destination, request.url))
+      : NextResponse.next({ request });
 
     cookieUpdates.forEach(({ name, value, options }) => {
       response.cookies.set(name, value, options);
@@ -50,7 +67,19 @@ export async function updateSupabaseSession(
     },
   );
 
-  await supabase.auth.getClaims();
+  const { data, error } = await supabase.auth.getClaims();
+  const subject = data?.claims.sub;
+  const isAuthenticated =
+    !error && typeof subject === 'string' && subject.length > 0;
+  const pathname = request.nextUrl.pathname;
+
+  if (isPrivateRoute(pathname) && !isAuthenticated) {
+    rebuildResponse('/login');
+  } else if (VISITOR_ROUTES.has(pathname) && isAuthenticated) {
+    rebuildResponse('/dashboard');
+  } else if (pathname === '/') {
+    rebuildResponse(isAuthenticated ? '/dashboard' : '/login');
+  }
 
   return response;
 }

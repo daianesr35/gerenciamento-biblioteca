@@ -80,7 +80,22 @@ describe('renovação de sessão no Proxy', () => {
     expect(response.headers.get('pragma')).toBe('no-cache');
   });
 
-  it('retorna resposta normal sem redirecionar quando não há sessão', async () => {
+  it('permite que usuário autenticado acesse rota privada', async () => {
+    const getClaims = vi.fn(async () => ({
+      data: { claims: { sub: 'user-id' } },
+      error: null,
+    }));
+    createServerClient.mockReturnValue({ auth: { getClaims } });
+
+    const response = await updateSupabaseSession(
+      new NextRequest('http://localhost:3000/dashboard'),
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get('location')).toBeNull();
+  });
+
+  it('redireciona usuário não autenticado de rota privada para Login', async () => {
     const getClaims = vi.fn(async () => ({
       data: null,
       error: new Error('Auth session missing'),
@@ -88,12 +103,51 @@ describe('renovação de sessão no Proxy', () => {
     createServerClient.mockReturnValue({ auth: { getClaims } });
 
     const response = await updateSupabaseSession(
-      new NextRequest('http://localhost:3000/login'),
+      new NextRequest('http://localhost:3000/dashboard'),
     );
 
     expect(getClaims).toHaveBeenCalledOnce();
-    expect(response.status).toBe(200);
-    expect(response.headers.get('location')).toBeNull();
+    expect(response.headers.get('location')).toBe(
+      'http://localhost:3000/login',
+    );
     expect(response.cookies.getAll()).toEqual([]);
+  });
+
+  it('redireciona usuário autenticado do Login para o Dashboard', async () => {
+    createServerClient.mockReturnValue({
+      auth: {
+        getClaims: vi.fn(async () => ({
+          data: { claims: { sub: 'user-id' } },
+          error: null,
+        })),
+      },
+    });
+
+    const response = await updateSupabaseSession(
+      new NextRequest('http://localhost:3000/login'),
+    );
+
+    expect(response.headers.get('location')).toBe(
+      'http://localhost:3000/dashboard',
+    );
+  });
+
+  it('redireciona usuário autenticado do Cadastro para o Dashboard', async () => {
+    createServerClient.mockReturnValue({
+      auth: {
+        getClaims: vi.fn(async () => ({
+          data: { claims: { sub: 'user-id' } },
+          error: null,
+        })),
+      },
+    });
+
+    const response = await updateSupabaseSession(
+      new NextRequest('http://localhost:3000/cadastro'),
+    );
+
+    expect(response.headers.get('location')).toBe(
+      'http://localhost:3000/dashboard',
+    );
   });
 });

@@ -264,7 +264,8 @@ Comportamentos:
 - visitante sem sessão em rota protegida: `/login?next=<caminho-seguro>`;
 - usuário autenticado em Login ou Cadastro: `/dashboard`;
 - login bem-sucedido: destino `next` interno validado ou `/dashboard`;
-- cadastro com sessão imediata: `/dashboard`;
+- cadastro concluído: encerra eventual sessão imediata no escopo local e segue
+  para `/login`;
 - logout: `/login`;
 - parâmetros `next` só aceitam caminhos internos conhecidos, evitando open
   redirect.
@@ -716,8 +717,9 @@ e-mail e aplica o mínimo local documentado de seis caracteres para a senha. O
 adaptador SSR chama `signUp` com `options.data.nome`, sem criar outro cliente e
 sem manipular cookies manualmente.
 
-Com sessão imediata, a interface segue para `/dashboard`. Sem sessão, informa
-que a confirmação de e-mail é necessária e mantém o caminho de volta ao Login.
+Após o ajuste do requisito de navegação, a interface sempre segue para
+`/login`. Se o provedor criar uma sessão imediata, o adaptador a encerra apenas
+no escopo local; sem sessão imediata, nenhuma chamada de encerramento é feita.
 Erros do provedor e do provisionamento são reduzidos a categorias internas e
 mensagens genéricas, sem detalhes SQL, constraints ou confirmação indevida da
 existência de conta.
@@ -797,3 +799,49 @@ Proteção e restauração completa da sessão, matriz de redirecionamentos,
 parâmetro `next`, identidade real no AppShell, Logout, recuperação de senha e
 recursos posteriores não foram implementados. A próxima tarefa é a **Tarefa 6.5
 — Restauração de sessão e proteção de rotas**.
+
+## 16. Implementação da Tarefa 6.5
+
+### Restauração da sessão
+
+O Proxy continua usando o cliente SSR e a infraestrutura de cookies existentes.
+Em cada rota de aplicação interceptada, `getClaims()` valida a identidade e
+permite que o pacote renove a sessão quando necessário. Cookies renovados e
+cabeçalhos anti-cache são preservados também nas respostas de redirecionamento.
+Não existe cliente Supabase paralelo, leitura por `getSession()` ou manipulação
+manual de cookies.
+
+### Proteção das rotas atuais
+
+A matriz mínima do Proxy classifica somente as rotas existentes. Dashboard,
+Biblioteca, Livro novo, Detalhes e Edição de Livro, Solicitações, Empréstimos,
+Página Pública administrativa, Configurações e Perfil exigem identidade válida.
+Sem autenticação, o destino é `/login`, sem parâmetro `next`.
+
+Usuários autenticados em `/login` ou `/cadastro` são encaminhados para
+`/dashboard`. A raiz também decide entre Login e Dashboard conforme a
+autenticação. O layout privado repete a validação com
+`getServerAuthIdentity()` antes de renderizar o `AppShell`, sem carregar dados
+adicionais do usuário.
+
+### Testes e limites
+
+Os testes indispensáveis cobrem usuário autenticado em rota privada, usuário
+não autenticado desviado para Login e usuário autenticado desviado de Login e
+Cadastro para Dashboard. Os testes existentes de renovação continuam cobrindo
+a propagação de cookies e cabeçalhos.
+
+Logout, parâmetro `next`, recuperação de senha, refresh manual, permissões,
+papéis, identidade real no shell e funcionalidades posteriores não foram
+implementados. A próxima tarefa é a **Tarefa 6.6 — Logout**.
+
+### Ajuste do destino após Cadastro
+
+O requisito de navegação foi confirmado como Cadastro → Login em todos os
+casos. `signUpOwner` encerra com `signOut({ scope: 'local' })` somente a sessão
+eventualmente criada pelo próprio `signUp`, evitando que a proteção de
+`/login` encaminhe o novo usuário para o Dashboard. O resultado do Cadastro
+passou a ser único e a interface substitui a rota por `/login`.
+
+Esse encerramento pontual não implementa o Logout da Tarefa 6.6: não existe
+ação geral, botão, serviço reutilizável ou alteração de outras sessões.

@@ -54,7 +54,7 @@ export type RegistrationFieldErrors = Readonly<{
 
 export type RegistrationResult =
   | Readonly<{
-      status: 'authenticated' | 'confirmation_required';
+      status: 'registered';
     }>
   | Readonly<{
       status: 'invalid';

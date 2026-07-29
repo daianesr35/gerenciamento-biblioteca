@@ -105,8 +105,8 @@ describe('cadastro de proprietário', () => {
     expect(signUp).not.toHaveBeenCalled();
   });
 
-  it('normaliza entrada válida e retorna sucesso com sessão', async () => {
-    const signUp = vi.fn(async () => ({ hasSession: true }));
+  it('normaliza entrada válida e retorna cadastro concluído', async () => {
+    const signUp = vi.fn(async () => undefined);
 
     await expect(
       registerOwner(
@@ -117,27 +117,12 @@ describe('cadastro de proprietário', () => {
         },
         signUp,
       ),
-    ).resolves.toEqual({ status: 'authenticated' });
+    ).resolves.toEqual({ status: 'registered' });
     expect(signUp).toHaveBeenCalledWith({
       name: 'Maria da Silva',
       email: 'maria@example.com',
       password: '123456',
     });
-  });
-
-  it('orienta confirmação quando o cadastro não retorna sessão', async () => {
-    const signUp = vi.fn(async () => ({ hasSession: false }));
-
-    await expect(
-      registerOwner(
-        {
-          name: 'Maria',
-          email: 'maria@example.com',
-          password: '123456',
-        },
-        signUp,
-      ),
-    ).resolves.toEqual({ status: 'confirmation_required' });
   });
 
   it('normaliza erro sem expor detalhes do provedor', async () => {
