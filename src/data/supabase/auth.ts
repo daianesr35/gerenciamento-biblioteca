@@ -68,3 +68,12 @@ export async function signInOwner(input: LoginInput): Promise<void> {
     throw error;
   }
 }
+
+export async function signOutOwner(): Promise<void> {
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase.auth.signOut({ scope: 'local' });
+
+  if (error) {
+    throw error;
+  }
+}

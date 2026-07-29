@@ -845,3 +845,36 @@ passou a ser único e a interface substitui a rota por `/login`.
 
 Esse encerramento pontual não implementa o Logout da Tarefa 6.6: não existe
 ação geral, botão, serviço reutilizável ou alteração de outras sessões.
+
+## 17. Implementação da Tarefa 6.6
+
+### Logout da sessão atual
+
+O adaptador `signOutOwner`, em `src/data/supabase/auth.ts`, reutiliza o cliente
+SSR de servidor existente e chama `signOut({ scope: 'local' })`. Assim, somente
+a sessão atual é encerrada pela infraestrutura de cookies do Supabase, sem
+manipulação manual de cookies ou tokens e sem criação de outro cliente.
+
+A Server Action `logoutAction` executa o adaptador e, quando concluída,
+redireciona para `/login`. A proteção implementada na Tarefa 6.5 continua
+impedindo o acesso às rotas privadas após o encerramento da sessão.
+
+### Interface e falhas
+
+A opção “Sair” foi adicionada ao rodapé da barra lateral do `AppShell`, abaixo
+da identificação do proprietário. Durante o envio, o botão fica desabilitado e
+indica “Saindo…”. Se o Supabase rejeitar o encerramento, a sessão não é tratada
+como encerrada, não ocorre redirecionamento e a interface apresenta somente a
+mensagem segura “Não foi possível sair. Tente novamente.”.
+
+### Testes e limites
+
+Os testes indispensáveis cobrem a chamada exata de `signOut` com escopo local,
+o Logout concluído, o redirecionamento para `/login` e a normalização segura de
+falhas. As suítes existentes continuam cobrindo Cadastro, Login, restauração de
+sessão e proteção de rotas.
+
+Não foram implementados encerramento global, confirmação, recuperação ou
+alteração de senha, gerenciamento de dispositivos, auditoria, permissões,
+papéis ou funcionalidades posteriores. Nenhuma migration foi criada ou
+alterada.

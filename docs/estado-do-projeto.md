@@ -285,8 +285,22 @@ usuário não autenticado, e acesso autenticado a Login e Cadastro. Não foram
 implementados parâmetro `next`, Logout, identidade no AppShell, permissões,
 papéis ou recursos posteriores.
 
-## Próxima etapa recomendada
+## Conclusão da Tarefa 6.6
 
-**Tarefa 6.6 — Logout.**
+O Logout funcional foi implementado com o adaptador Supabase existente. A
+operação usa `signOut({ scope: 'local' })`, encerrando somente a sessão atual
+por meio da infraestrutura SSR e dos cookies já existentes. A Server Action
+redireciona o usuário para `/login` após o sucesso.
 
-A próxima tarefa deverá ser iniciada somente mediante autorização específica.
+A opção “Sair” fica no rodapé da barra lateral do `AppShell`, abaixo da
+identificação do proprietário. Em caso de falha, a interface permanece na área
+autenticada e apresenta somente “Não foi possível sair. Tente novamente.”, sem
+expor mensagens internas do provedor.
+
+Os testes indispensáveis cobrem a chamada de `signOut`, o escopo local, o
+Logout concluído, o redirecionamento para `/login` e a mensagem segura em caso
+de falha. As proteções de rotas da Tarefa 6.5 e os fluxos existentes de Cadastro
+e Login foram preservados.
+
+Nenhum cliente Supabase, migration, manipulação manual de cookies ou
+funcionalidade posterior foi adicionado.

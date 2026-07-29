@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState, type ReactNode } from 'react';
 
+import { LogoutButton } from '@/components/logout-button';
 import { ButtonLink, SearchField } from '@/components/ui';
 
 const navigation = [
@@ -154,6 +155,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <span>Proprietária</span>
           </span>
         </Link>
+        <LogoutButton />
       </aside>
       <div className="main-wrap">
         <header className={`topbar ${hasQuietTopbar ? 'library-topbar' : ''}`}>

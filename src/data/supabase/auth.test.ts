@@ -6,7 +6,12 @@ vi.mock('@/data/supabase/server', () => ({
   createSupabaseServerClient,
 }));
 
-import { getServerAuthIdentity, signInOwner, signUpOwner } from './auth';
+import {
+  getServerAuthIdentity,
+  signInOwner,
+  signOutOwner,
+  signUpOwner,
+} from './auth';
 
 beforeEach(() => {
   createSupabaseServerClient.mockReset();
@@ -192,5 +197,31 @@ describe('login no Supabase Auth', () => {
         password: 'senha-incorreta',
       }),
     ).rejects.toBe(providerError);
+  });
+});
+
+describe('logout no Supabase Auth', () => {
+  it('encerra somente a sessão atual', async () => {
+    const signOut = vi.fn(async () => ({ error: null }));
+    createSupabaseServerClient.mockResolvedValue({
+      auth: { signOut },
+    });
+
+    await expect(signOutOwner()).resolves.toBeUndefined();
+    expect(signOut).toHaveBeenCalledWith({ scope: 'local' });
+  });
+
+  it('preserva o erro para tratamento seguro pela ação', async () => {
+    const providerError = {
+      code: 'unexpected_failure',
+      message: 'detalhe interno do Supabase',
+    };
+    createSupabaseServerClient.mockResolvedValue({
+      auth: {
+        signOut: vi.fn(async () => ({ error: providerError })),
+      },
+    });
+
+    await expect(signOutOwner()).rejects.toBe(providerError);
   });
 });
