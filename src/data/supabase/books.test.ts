@@ -9,6 +9,7 @@ import {
   getAuthenticatedBookRow,
   insertAuthenticatedBookRow,
   listAuthenticatedBookRows,
+  updateAuthenticatedBookRow,
 } from './books';
 
 const LIBRARY_ID = '123e4567-e89b-42d3-a456-426614174001';
@@ -126,6 +127,87 @@ describe('adaptador Supabase de Livros', () => {
     await expect(getAuthenticatedBookRow(BOOK_ID)).rejects.toEqual({
       code: 'book_query_unavailable',
     });
+  });
+});
+
+describe('atualização de Livro', () => {
+  function createUpdateClient(result: QueryResult) {
+    const maybeSingle = vi.fn(async () => result);
+    const select = vi.fn(() => ({ maybeSingle }));
+    const byId = vi.fn(() => ({ select }));
+    const byLibrary = vi.fn(() => ({ eq: byId }));
+    const update = vi.fn(() => ({ eq: byLibrary }));
+    const from = vi.fn((table: string) =>
+      table === 'bibliotecas'
+        ? {
+            select: vi.fn(() => ({
+              limit: vi.fn(() => ({
+                maybeSingle: vi.fn(async () => ({
+                  data: { id: LIBRARY_ID },
+                  error: null,
+                })),
+              })),
+            })),
+          }
+        : { update },
+    );
+
+    return { client: { from }, update, byLibrary, byId, select };
+  }
+
+  it('filtra Livro e Biblioteca e atualiza somente campos permitidos', async () => {
+    const query = createUpdateClient({ data: { id: BOOK_ID }, error: null });
+    createSupabaseServerClient.mockResolvedValue(query.client);
+
+    await expect(
+      updateAuthenticatedBookRow(BOOK_ID, {
+        title: 'Livro editado',
+        author: 'Autora',
+        isbn: null,
+        publisher: 'Editora',
+        coverImageUrl: null,
+      }),
+    ).resolves.toBe(true);
+
+    expect(query.update).toHaveBeenCalledWith({
+      titulo: 'Livro editado',
+      autor: 'Autora',
+      isbn: null,
+      editora: 'Editora',
+      imagem_capa: null,
+    });
+    expect(query.byLibrary).toHaveBeenCalledWith('biblioteca_id', LIBRARY_ID);
+    expect(query.byId).toHaveBeenCalledWith('id', BOOK_ID);
+    expect(query.select).toHaveBeenCalledWith('id');
+  });
+
+  it('trata zero linhas como ausência e normaliza falha', async () => {
+    const absent = createUpdateClient({ data: null, error: null });
+    createSupabaseServerClient.mockResolvedValueOnce(absent.client);
+    await expect(
+      updateAuthenticatedBookRow(BOOK_ID, {
+        title: 'Livro',
+        author: 'Autora',
+        isbn: null,
+        publisher: null,
+        coverImageUrl: null,
+      }),
+    ).resolves.toBe(false);
+
+    const failed = createUpdateClient({
+      data: null,
+      error: new Error('interno'),
+    });
+    createSupabaseServerClient.mockResolvedValueOnce(failed.client);
+    await expect(
+      updateAuthenticatedBookRow(BOOK_ID, {
+        title: 'Livro',
+        author: 'Autora',
+        isbn: null,
+        publisher: null,
+        coverImageUrl: null,
+      }),
+    ).rejects.toEqual({ code: 'book_update_unavailable' });
   });
 });
 

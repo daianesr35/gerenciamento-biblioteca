@@ -2,6 +2,7 @@ import {
   getAuthenticatedBookRow,
   insertAuthenticatedBookRow,
   listAuthenticatedBookRows,
+  updateAuthenticatedBookRow,
   type BookRow,
 } from '@/data/supabase/books';
 import type {
@@ -10,6 +11,8 @@ import type {
   BookListResult,
   CreateBookInput,
   CreateBookResult,
+  UpdateBookInput,
+  UpdateBookResult,
 } from '@/types/books';
 
 const UUID_PATTERN =
@@ -106,6 +109,55 @@ export async function createOwnBook(
   try {
     await insertBook(normalized);
     return { status: 'success' };
+  } catch {
+    return { status: 'error', category: 'unavailable' };
+  }
+}
+
+type UpdateBook = (bookId: string, input: UpdateBookInput) => Promise<boolean>;
+
+export async function updateOwnBook(
+  bookId: string,
+  input: UpdateBookInput,
+  updateBook: UpdateBook = updateAuthenticatedBookRow,
+): Promise<UpdateBookResult> {
+  if (!UUID_PATTERN.test(bookId)) {
+    return { status: 'invalid_id' };
+  }
+
+  const normalized: UpdateBookInput = {
+    isbn: normalizeOptional(input.isbn),
+    title: input.title.trim(),
+    author: input.author.trim(),
+    publisher: normalizeOptional(input.publisher),
+    coverImageUrl: normalizeOptional(input.coverImageUrl),
+  };
+  const fieldErrors: Record<string, string> = {};
+
+  if (!normalized.title) {
+    fieldErrors.title = 'Informe o título.';
+  }
+  if (!normalized.author) {
+    fieldErrors.author = 'Informe o autor.';
+  }
+  if (normalized.coverImageUrl) {
+    try {
+      const url = new URL(normalized.coverImageUrl);
+      if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+        fieldErrors.coverImageUrl = 'Informe uma URL de capa válida.';
+      }
+    } catch {
+      fieldErrors.coverImageUrl = 'Informe uma URL de capa válida.';
+    }
+  }
+
+  if (Object.keys(fieldErrors).length > 0) {
+    return { status: 'invalid', fieldErrors };
+  }
+
+  try {
+    const updated = await updateBook(bookId, normalized);
+    return updated ? { status: 'success' } : { status: 'not_found' };
   } catch {
     return { status: 'error', category: 'unavailable' };
   }

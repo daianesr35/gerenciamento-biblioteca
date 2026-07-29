@@ -1,7 +1,7 @@
 import { createSupabaseServerClient } from '@/data/supabase/server';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { BookStatus } from '@/types/books';
-import type { CreateBookInput } from '@/types/books';
+import type { CreateBookInput, UpdateBookInput } from '@/types/books';
 
 export const BOOK_COLUMNS = 'id,isbn,titulo,autor,editora,imagem_capa,situacao';
 
@@ -86,4 +86,31 @@ export async function insertAuthenticatedBookRow(
   if (error) {
     throw { code: 'book_insert_unavailable' };
   }
+}
+
+export async function updateAuthenticatedBookRow(
+  bookId: string,
+  input: UpdateBookInput,
+): Promise<boolean> {
+  const supabase = await createSupabaseServerClient();
+  const libraryId = await getAuthenticatedLibraryId(supabase);
+  const { data, error } = await supabase
+    .from('livros')
+    .update({
+      isbn: input.isbn,
+      titulo: input.title,
+      autor: input.author,
+      editora: input.publisher,
+      imagem_capa: input.coverImageUrl,
+    })
+    .eq('biblioteca_id', libraryId)
+    .eq('id', bookId)
+    .select('id')
+    .maybeSingle();
+
+  if (error) {
+    throw { code: 'book_update_unavailable' };
+  }
+
+  return data !== null;
 }

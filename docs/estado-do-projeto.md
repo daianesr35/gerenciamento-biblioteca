@@ -408,3 +408,31 @@ Nenhuma consulta foi duplicada, e nenhum cliente Supabase de navegador, Server
 Action, API Route, migration ou policy foi criado ou alterado. A exclusão
 também permanece não implementada. A Etapa 7 continua em andamento, e a
 próxima tarefa é a Tarefa 7.6 — Edição.
+
+## Conclusão da Tarefa 7.6
+
+A rota privada `/livros/[id]/editar` foi conectada aos dados reais. O
+carregamento inicial ocorre no servidor com uma única chamada a
+`getOwnBookById()`, e o formulário apresenta os valores atuais de título,
+autor, ISBN, editora e URL da capa.
+
+A Server Action específica de edição envia somente os cinco campos permitidos
+ao service. Título e autor são obrigatórios, os valores são normalizados no
+servidor, opcionais vazios são convertidos em `null` e a URL da capa aceita
+somente HTTP ou HTTPS.
+
+O adaptador usa o cliente Supabase SSR por requisição, resolve a Biblioteca da
+sessão autenticada e executa `UPDATE` filtrado explicitamente pelo UUID do Livro
+e pelo `biblioteca_id`, sob as policies RLS existentes. O payload não permite
+alterar identificadores, situação ou datas. Livro inexistente ou inacessível e
+falhas técnicas recebem estados públicos seguros.
+
+Após o sucesso, `/biblioteca`, `/livros/[id]` e `/livros/[id]/editar` são
+revalidados, e o usuário é redirecionado para os detalhes atualizados. Foram
+adicionados testes proporcionais da página, Server Action, service e adaptador,
+sem acesso à rede ou ao Supabase remoto.
+
+O teste manual autenticado não foi executado.
+
+Exclusão ainda não foi implementada. A Etapa 7 permanece em andamento, e a
+próxima tarefa é a Tarefa 7.7 — Exclusão.

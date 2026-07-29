@@ -40,3 +40,16 @@ export type CreateBookResult =
 export type CreateBookActionState =
   | Readonly<{ status: 'idle' }>
   | CreateBookResult;
+
+export type UpdateBookInput = CreateBookInput;
+
+export type UpdateBookResult =
+  | Readonly<{ status: 'success' }>
+  | Readonly<{ status: 'invalid_id' }>
+  | Readonly<{ status: 'invalid'; fieldErrors: CreateBookFieldErrors }>
+  | Readonly<{ status: 'not_found' }>
+  | Readonly<{ status: 'error'; category: 'unavailable' }>;
+
+export type UpdateBookActionState =
+  | Readonly<{ status: 'idle' }>
+  | UpdateBookResult;
