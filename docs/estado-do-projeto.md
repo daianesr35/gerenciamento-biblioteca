@@ -498,3 +498,21 @@ não redireciona.
 
 A integração visual e o preenchimento editável do formulário permanecem
 exclusivamente para a Tarefa 8.3.
+
+## Conclusão da Tarefa 8.3
+
+O formulário de novo Livro passou a consultar a Server Action da Google Books
+por um botão `Buscar ISBN` independente da submissão. Durante a consulta, o
+botão fica desabilitado e apresenta um estado simples de carregamento.
+
+Quando a consulta encontra o Livro, somente título, autor, ISBN, editora e URL
+da capa que possuam valor são preenchidos. Todos os campos permanecem editáveis,
+e valores vazios da API não apagam informações digitadas. ISBN inválido, Livro
+não encontrado, timeout e indisponibilidade exibem mensagens simples e
+preservam integralmente o formulário.
+
+O cadastro manual continua disponível sem consulta e sem ISBN. A persistência
+permanece exclusivamente no botão `Salvar livro`, por meio de
+`createBookAction` e `createOwnBook`. A consulta não acessa Supabase, não salva,
+não revalida páginas e não redireciona. Banco, migrations, RLS, autenticação,
+sessão, dependências e a SDD oficial não foram alterados.

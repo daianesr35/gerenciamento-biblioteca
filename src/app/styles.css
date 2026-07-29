@@ -783,6 +783,17 @@ h3 {
   grid-column: 1 / -1;
 }
 
+.isbn-lookup {
+  align-items: end;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.isbn-lookup .button {
+  margin-bottom: 1px;
+}
+
 .book-form-message {
   margin: 0;
 }
@@ -3551,6 +3562,14 @@ h3 {
 
   .book-form-grid > * {
     grid-column: auto;
+  }
+
+  .isbn-lookup {
+    grid-template-columns: 1fr;
+  }
+
+  .isbn-lookup .button {
+    width: 100%;
   }
 
   .new-book-actions {
