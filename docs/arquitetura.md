@@ -19,7 +19,7 @@ Derivados da SDD funcional:
 - aplicação web responsiva com áreas privadas e públicas;
 - isolamento futuro dos dados de cada proprietário;
 - acesso público restrito ao catálogo disponibilizado pela biblioteca;
-- integração futura com Google Books e geração de QR Code;
+- integração com Google Books e futura geração de QR Code;
 - transições consistentes de solicitações, empréstimos e devoluções;
 - proteção de segredos e separação entre configuração pública e privada;
 - possibilidade de evolução incremental sem acoplar interface ao provedor de
@@ -167,6 +167,12 @@ Falhas de validação, ausência, HTTP, rede, timeout e resposta inesperada são
 normalizadas. A consulta não acessa o Supabase, não persiste dados, não revalida
 rotas e não redireciona.
 
+No formulário de novo Livro, a consulta é acionada por um botão independente da
+submissão. Somente valores não vazios retornados são aplicados aos cinco campos
+bibliográficos, que permanecem editáveis. A criação continua exclusiva da
+Server Action de cadastro acionada por `Salvar livro`, preservando o fluxo
+manual sem consulta e sem ISBN.
+
 ### Supabase
 
 Os pacotes `@supabase/supabase-js` e `@supabase/ssr` estão instalados com versões
@@ -274,8 +280,8 @@ Nenhum projeto Vercel, recurso remoto ou deploy foi criado nesta etapa.
 - Login funcional: Tarefa 6.4.
 - Proteção final, redirecionamentos e identidade no layout privado: Tarefa 6.5.
 - Logout: Tarefa 6.6.
-- Catálogo, Google Books, página pública, QR Code, solicitações, empréstimos e
-  devoluções: etapas funcionais posteriores.
+- Página pública, QR Code, solicitações, empréstimos e devoluções: etapas
+  funcionais posteriores.
 - Pipeline de entrega e provisionamento/deploy remoto: Etapa 13.
 
 ## Histórico de decisões
@@ -289,3 +295,4 @@ Nenhum projeto Vercel, recurso remoto ou deploy foi criado nesta etapa.
 | 5.4   | Solicitação e Empréstimo modelados separadamente, com vínculos estruturais ao Livro e entre si; interface, automações e transações permaneceram adiadas.         |
 | 5.5   | Proprietário vinculado a `auth.users`; RLS aplicada às cinco tabelas; acesso público reduzido a três RPCs e grants mínimos, sem integrar a interface.            |
 | 6.2   | Infraestrutura SSR criada com clientes browser/server/proxy, cookies renováveis, validação central de identidade e cabeçalhos anti-cache, sem fluxos funcionais. |
+| 8     | Consulta Google Books por ISBN integrada ao cadastro com preenchimento editável, fallback manual e persistência somente após confirmação do usuário.             |

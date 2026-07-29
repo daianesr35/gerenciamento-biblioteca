@@ -15,6 +15,7 @@ arquitetura base executável:
   6.5 foram concluídas.
 - **Etapa 7 — Cadastro manual de livros:** em andamento; as Tarefas 7.1, 7.2,
   7.3 e 7.4 foram concluídas.
+- **Etapa 8 — Integração com Google Books:** concluída em 29 de julho de 2026.
 
 A Tarefa 6.2 instalou `@supabase/ssr@0.12.3` e implementou a infraestrutura de
 sessão SSR: cliente de navegador, cliente de servidor por requisição, utilitário
@@ -56,8 +57,9 @@ cinco tabelas, o vínculo único com `auth.users` sustenta o isolamento privado 
 o acesso anônimo está restrito a três RPCs mínimas, sem acesso direto às
 tabelas. Cadastro e Login estão conectados ao Auth, e `/biblioteca` lista os
 Livros reais do Proprietário autenticado; as demais telas de domínio continuam
-simuladas. Integração com a Google Books, QR Code funcional e recursos remotos
-não foram criados. Login, Dashboard,
+simuladas. A integração com a Google Books está funcional no cadastro de Livro;
+QR Code funcional e os demais recursos remotos ainda não foram criados. Login,
+Dashboard,
 Biblioteca, Cadastro de Livro, Detalhes do Livro, Solicitações, Empréstimos,
 Configurações, Perfil e Página Pública passaram pela revisão visual específica e
 pela consolidação final de consistência, navegação, responsividade e
@@ -516,3 +518,27 @@ permanece exclusivamente no botão `Salvar livro`, por meio de
 `createBookAction` e `createOwnBook`. A consulta não acessa Supabase, não salva,
 não revalida páginas e não redireciona. Banco, migrations, RLS, autenticação,
 sessão, dependências e a SDD oficial não foram alterados.
+
+## Conclusão da Tarefa 8.4 e da Etapa 8
+
+A revisão final confirmou a integração Google Books operacional e coerente com
+a arquitetura. ISBN válido consulta o serviço server-side e preenche somente os
+dados bibliográficos disponíveis; todos os campos permanecem editáveis. ISBN
+inválido, ausência no catálogo, timeout e indisponibilidade apresentam mensagens
+padronizadas sem apagar valores já digitados.
+
+O cadastro manual permanece funcional sem ISBN e sem consulta. `Buscar ISBN` é
+um botão independente e não persiste, revalida nem redireciona; somente `Salvar
+livro` executa `createBookAction`, `createOwnBook` e a inserção no Supabase.
+
+A cobertura existente foi considerada suficiente e proporcional ao
+encerramento: adaptador HTTP, timeout e indisponibilidade, normalização e
+mapeamento, Server Action sem efeitos colaterais, preenchimento parcial,
+preservação do formulário e composição da página estão automatizados. A suíte
+completa possui 24 arquivos e 150 testes aprovados. `git diff --check`, ESLint,
+Prettier, TypeScript e o build de produção também foram aprovados.
+
+Não foram alterados banco de dados, migrations, RLS, autenticação, sessão,
+Supabase, dependências, arquitetura principal ou a SDD oficial. Nenhuma
+funcionalidade de etapa futura foi antecipada. A Etapa 8 está concluída e o
+projeto está pronto para usar esse resultado como base da Etapa 9.

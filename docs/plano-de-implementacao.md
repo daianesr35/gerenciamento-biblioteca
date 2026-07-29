@@ -57,7 +57,7 @@ tabelas, rotas, tecnologias ou provedores.
 | 5 | Modelagem do banco de dados | Concluída |
 | 6 | Autenticação | Pendente |
 | 7 | Cadastro manual de livros | Pendente |
-| 8 | Integração com Google Books | Pendente |
+| 8 | Integração com Google Books | Concluída |
 | 9 | Página pública da biblioteca e QR Code | Pendente |
 | 10 | Solicitações de empréstimo | Pendente |
 | 11 | Empréstimos e devoluções | Pendente |
@@ -565,6 +565,12 @@ integrações e documentação de ambiente se aplicável.
 - nenhuma consulta cria livro sem confirmação;
 - falha externa não impede o cadastro manual;
 - livro confirmado inicia Disponível.
+
+**Status atual:** **Concluída em 29 de julho de 2026.** A consulta server-side
+por ISBN, o preenchimento editável, o fallback manual e a separação entre
+consulta e persistência foram implementados. O encerramento confirmou 24
+arquivos e 150 testes aprovados, além de lint, formatação, TypeScript e build de
+produção.
 
 **Critério de conclusão:** integração resiliente e validada sem criar dependência
 obrigatória para o cadastro.

@@ -11,14 +11,16 @@ Atualmente, é possível testar:
 - login, restauração de sessão, proteção das rotas privadas e logout;
 - listagem dos Livros da Biblioteca autenticada;
 - cadastro manual de Livro;
+- consulta de dados bibliográficos por ISBN na Google Books, com revisão antes
+  do salvamento e fallback para cadastro manual;
 - consulta dos detalhes de um Livro;
 - edição dos dados bibliográficos;
 - exclusão física de Livro com confirmação, desde que não existam Solicitações
   ou Empréstimos relacionados;
 - isolamento dos dados por Biblioteca com Row Level Security (RLS).
 
-Dashboard, Página Pública, Solicitações, Empréstimos, Devoluções, QR Code e
-integração com Google Books ainda não possuem fluxo funcional completo.
+Dashboard, Página Pública, Solicitações, Empréstimos, Devoluções e QR Code ainda
+não possuem fluxo funcional completo.
 
 ## Pré-requisitos
 
@@ -166,7 +168,8 @@ Com os serviços iniciados:
    pré-configurado.
 3. Entre com a conta criada.
 4. Acesse **Livros**.
-5. Cadastre um Livro manualmente.
+5. Cadastre um Livro manualmente ou use **Buscar ISBN** para preencher os dados
+   disponíveis; revise os campos e use **Salvar livro** para persistir.
 6. Abra os detalhes para consultar, editar ou excluir o Livro.
 7. Use **Sair** para encerrar a sessão.
 
