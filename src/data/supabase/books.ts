@@ -1,0 +1,67 @@
+import { createSupabaseServerClient } from '@/data/supabase/server';
+import type { SupabaseClient } from '@supabase/supabase-js';
+import type { BookStatus } from '@/types/books';
+
+export const BOOK_COLUMNS = 'id,isbn,titulo,autor,editora,imagem_capa,situacao';
+
+export type BookRow = Readonly<{
+  id: string;
+  isbn: string | null;
+  titulo: string;
+  autor: string;
+  editora: string | null;
+  imagem_capa: string | null;
+  situacao: BookStatus;
+}>;
+
+async function getAuthenticatedLibraryId(
+  supabase: SupabaseClient,
+): Promise<string> {
+  const { data, error } = await supabase
+    .from('bibliotecas')
+    .select('id')
+    .limit(1)
+    .maybeSingle();
+
+  if (error || !data) {
+    throw { code: 'library_unavailable' };
+  }
+
+  return data.id;
+}
+
+export async function listAuthenticatedBookRows(): Promise<readonly BookRow[]> {
+  const supabase = await createSupabaseServerClient();
+  const libraryId = await getAuthenticatedLibraryId(supabase);
+  const { data, error } = await supabase
+    .from('livros')
+    .select(BOOK_COLUMNS)
+    .eq('biblioteca_id', libraryId)
+    .order('titulo', { ascending: true })
+    .order('id', { ascending: true });
+
+  if (error) {
+    throw { code: 'book_list_unavailable' };
+  }
+
+  return (data ?? []) as BookRow[];
+}
+
+export async function getAuthenticatedBookRow(
+  bookId: string,
+): Promise<BookRow | null> {
+  const supabase = await createSupabaseServerClient();
+  const libraryId = await getAuthenticatedLibraryId(supabase);
+  const { data, error } = await supabase
+    .from('livros')
+    .select(BOOK_COLUMNS)
+    .eq('biblioteca_id', libraryId)
+    .eq('id', bookId)
+    .maybeSingle();
+
+  if (error) {
+    throw { code: 'book_query_unavailable' };
+  }
+
+  return data as BookRow | null;
+}

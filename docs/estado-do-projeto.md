@@ -319,3 +319,19 @@ permanece em andamento.
 A próxima tarefa autorizada será a Tarefa 7.2 — Camada mínima de consulta do
 catálogo, primeira tarefa funcional definida no plano técnico, somente mediante
 autorização específica.
+
+## Conclusão da Tarefa 7.2
+
+A camada mínima de consulta do catálogo foi implementada. Existem operações
+para listar os Livros da Biblioteca do Proprietário autenticado e consultar um
+Livro próprio por identificador. As consultas usam o cliente Supabase de
+servidor por requisição, resolvem a Biblioteca visível à sessão SSR, aplicam
+filtro explícito por Biblioteca e permanecem protegidas pela RLS.
+
+O contrato interno de leitura preserva somente os sete campos necessários, e as
+falhas técnicas são convertidas em resultados seguros. Livro inexistente e
+Livro inacessível possuem o mesmo resultado de não encontrado.
+
+Nenhuma página foi conectada, nenhum mock foi alterado e nenhuma mutação,
+migration ou policy foi implementada. A Etapa 7 continua em andamento. A
+próxima tarefa recomendada é a Tarefa 7.3 — Listagem real.
