@@ -381,3 +381,30 @@ A rota de edição foi separada da criação e permanece sem carregamento ou
 salvamento real. Nenhuma edição, exclusão, detalhe real, migration ou policy foi
 implementada. A Etapa 7 continua em andamento, e a próxima tarefa é a Tarefa
 7.5 — Detalhes.
+
+## Conclusão da Tarefa 7.5
+
+A rota privada `/livros/[id]` foi mantida como Server Component e conectada
+exclusivamente a `getOwnBookById()`, com uma chamada por renderização usando o
+UUID recebido pela rota. O service e o adaptador Supabase SSR existentes foram
+reutilizados, preservando o filtro pela Biblioteca autenticada e a RLS.
+
+A página apresenta somente os dados reais do contrato `Book`: título, autor,
+ISBN, editora, capa e situação traduzida para `Disponível` ou `Emprestado`.
+ISBN e editora ausentes recebem a indicação `Não informado`; a capa ausente usa
+o placeholder do Design System.
+
+UUID inválido e Livro não encontrado ou inacessível recebem a mesma mensagem
+segura. Falhas técnicas recebem mensagem genérica, sem detalhes internos. Todos
+os estados oferecem retorno para `/biblioteca`.
+
+Dados bibliográficos fictícios, descrição, categorias, etiquetas, notas,
+exemplares, atividades e datas simuladas foram removidos da composição. Ações
+simuladas de exclusão, empréstimo, devolução, solicitação e alteração de
+metadados também foram removidas. O link visual para a rota de edição foi
+preservado, mas a edição continua explicitamente indisponível nessa rota.
+
+Nenhuma consulta foi duplicada, e nenhum cliente Supabase de navegador, Server
+Action, API Route, migration ou policy foi criado ou alterado. A exclusão
+também permanece não implementada. A Etapa 7 continua em andamento, e a
+próxima tarefa é a Tarefa 7.6 — Edição.
