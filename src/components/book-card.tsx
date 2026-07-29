@@ -1,9 +1,16 @@
 import Link from 'next/link';
 
 import { Badge, Card, CoverPlaceholder } from '@/components/ui';
-import type { MockBook } from '@/data/mock/library';
 
-function CardActionIcon({ type }: { type: 'view' | 'edit' | 'more' }) {
+type BookCardBook = Readonly<{
+  id: string;
+  title: string;
+  author: string;
+  coverImageUrl?: string | null;
+  status: 'disponivel' | 'emprestado' | 'Disponível' | 'Emprestado';
+}>;
+
+function CardActionIcon({ type }: { type: 'view' | 'edit' }) {
   const paths = {
     view: (
       <>
@@ -15,13 +22,6 @@ function CardActionIcon({ type }: { type: 'view' | 'edit' | 'more' }) {
       <>
         <path d="m14.5 5.5 4 4M4 20l4.5-1 10-10a2.8 2.8 0 0 0-4-4l-10 10L4 20Z" />
         <path d="m13 7 4 4" />
-      </>
-    ),
-    more: (
-      <>
-        <circle cx="12" cy="5" r="1" />
-        <circle cx="12" cy="12" r="1" />
-        <circle cx="12" cy="19" r="1" />
       </>
     ),
   } as const;
@@ -37,18 +37,30 @@ export function BookCard({
   book,
   compactActions = false,
 }: {
-  book: MockBook;
+  book: BookCardBook;
   compactActions?: boolean;
 }) {
+  const isAvailable =
+    book.status === 'disponivel' || book.status === 'Disponível';
+  const statusLabel = isAvailable ? 'Disponível' : 'Emprestado';
+
   return (
     <Card className="book-card">
-      <CoverPlaceholder label={`Capa indisponível de ${book.title}`} />
+      {book.coverImageUrl ? (
+        // A URL é um dado bibliográfico e pode ter qualquer host.
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          alt={`Capa de ${book.title}`}
+          className="book-cover"
+          src={book.coverImageUrl}
+        />
+      ) : (
+        <CoverPlaceholder label={`Capa indisponível de ${book.title}`} />
+      )}
       <div className="book-card-copy">
         <h3>{book.title}</h3>
         <p>{book.author}</p>
-        <Badge tone={book.status === 'Disponível' ? 'success' : 'warning'}>
-          {book.status}
-        </Badge>
+        <Badge tone={isAvailable ? 'success' : 'warning'}>{statusLabel}</Badge>
       </div>
       <div className="actions">
         <Link
@@ -67,13 +79,6 @@ export function BookCard({
             >
               <CardActionIcon type="edit" />
             </Link>
-            <button
-              aria-label={`Mais ações para ${book.title}`}
-              className="button book-icon-button"
-              type="button"
-            >
-              <CardActionIcon type="more" />
-            </button>
           </>
         )}
       </div>

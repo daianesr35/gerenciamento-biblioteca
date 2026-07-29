@@ -13,6 +13,8 @@ arquitetura base executável:
   foram concluídas.
 - **Etapa 6 — Autenticação:** em andamento; as Tarefas 6.1, 6.2, 6.3, 6.4 e
   6.5 foram concluídas.
+- **Etapa 7 — Cadastro manual de livros:** em andamento; as Tarefas 7.1, 7.2 e
+  7.3 foram concluídas.
 
 A Tarefa 6.2 instalou `@supabase/ssr@0.12.3` e implementou a infraestrutura de
 sessão SSR: cliente de navegador, cliente de servidor por requisição, utilitário
@@ -41,8 +43,9 @@ as rotas privadas atuais. Sem identidade válida, essas rotas seguem para
 O repositório possui uma aplicação Next.js tipada e preparada para evolução
 modular. A implementação consolidada da Etapa 4 inclui as dez telas principais,
 a tela auxiliar de Edição de Livro, a navegação-base e componentes visuais
-reutilizáveis. As telas utilizam dados simulados e comportamentos locais para
-representar integrações e funcionalidades reservadas às etapas posteriores.
+reutilizáveis. As interfaces ainda não conectadas utilizam dados simulados e
+comportamentos locais para representar integrações e funcionalidades reservadas
+às etapas posteriores.
 
 As tabelas `proprietarios`, `bibliotecas`, `livros`, `solicitacoes` e
 `emprestimos` e suas migrations SQL de domínio foram criadas. O catálogo
@@ -51,9 +54,10 @@ obrigatório com Biblioteca. Solicitações e Empréstimos possuem estados, data
 relacionamentos com Livro e vínculo opcional entre si. RLS está habilitada nas
 cinco tabelas, o vínculo único com `auth.users` sustenta o isolamento privado e
 o acesso anônimo está restrito a três RPCs mínimas, sem acesso direto às
-tabelas. Cadastro e Login estão conectados ao Auth; as telas de domínio
-continuam simuladas. Integração com a Google Books, QR Code funcional e recursos
-remotos não foram criados. Login, Dashboard,
+tabelas. Cadastro e Login estão conectados ao Auth, e `/biblioteca` lista os
+Livros reais do Proprietário autenticado; as demais telas de domínio continuam
+simuladas. Integração com a Google Books, QR Code funcional e recursos remotos
+não foram criados. Login, Dashboard,
 Biblioteca, Cadastro de Livro, Detalhes do Livro, Solicitações, Empréstimos,
 Configurações, Perfil e Página Pública passaram pela revisão visual específica e
 pela consolidação final de consistência, navegação, responsividade e
@@ -335,3 +339,21 @@ Livro inacessível possuem o mesmo resultado de não encontrado.
 Nenhuma página foi conectada, nenhum mock foi alterado e nenhuma mutação,
 migration ou policy foi implementada. A Etapa 7 continua em andamento. A
 próxima tarefa recomendada é a Tarefa 7.3 — Listagem real.
+
+## Conclusão da Tarefa 7.3
+
+A página privada `/biblioteca` foi convertida em Server Component e conectada
+exclusivamente a `listOwnBooks()`. A listagem preserva a ordenação do service e
+apresenta os dados reais em cards, com título, autor, capa ou placeholder,
+situação traduzida para `Disponível` ou `Emprestado` e links de detalhe e
+edição.
+
+Lista vazia é tratada como sucesso com acesso a `/livros/novo`. Falhas recebem
+mensagem segura sem detalhes internos. Busca, filtros, ordenação configurável,
+estatísticas, paginação e ações simuladas incompatíveis foram removidos da
+composição da página.
+
+O `BookCard` permanece compatível com os mocks usados pelo Dashboard. O arquivo
+de mocks foi preservado, e as demais páginas continuam simuladas. Nenhuma
+mutação, migration, policy ou cliente Supabase de navegador foi criado. A Etapa
+7 continua em andamento, e a próxima tarefa é a Tarefa 7.4 — Cadastro manual.
