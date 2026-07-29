@@ -304,3 +304,18 @@ e Login foram preservados.
 
 Nenhum cliente Supabase, migration, manipulação manual de cookies ou
 funcionalidade posterior foi adicionado.
+
+## Conclusão da Tarefa 7.1
+
+A Tarefa 7.1 — Inspeção e planejamento técnico do catálogo foi concluída. O
+repositório, o modelo persistente de Livro, as policies RLS, a infraestrutura
+Supabase SSR e as interfaces simuladas do catálogo foram inspecionados. O plano
+técnico detalhado da Etapa 7 foi criado em `docs/plano-tecnico-catalogo.md`.
+
+Nenhuma funcionalidade do CRUD de Livros foi implementada, nenhuma página foi
+conectada ao banco e nenhuma migration ou policy foi alterada. A Etapa 7
+permanece em andamento.
+
+A próxima tarefa autorizada será a Tarefa 7.2 — Camada mínima de consulta do
+catálogo, primeira tarefa funcional definida no plano técnico, somente mediante
+autorização específica.
