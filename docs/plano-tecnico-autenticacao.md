@@ -1,4 +1,4 @@
-# Plano técnico de autenticação — Tarefa 6.1
+# Plano técnico de autenticação — Etapa 6
 
 ## 1. Finalidade e escopo
 
@@ -485,6 +485,7 @@ infraestrutura de Auth for implementada.
 
 ### Tarefa 6.2 — Infraestrutura de autenticação e sessão
 
+- Status: **Concluída em 28 de julho de 2026.**
 - Objetivo: instalar `@supabase/ssr`, criar clientes browser/server/proxy,
   persistir/renovar cookies e definir contratos/validações.
 - Arquivos: package/lockfile, `src/data/supabase/**`, `src/services/auth.ts`,
@@ -567,6 +568,12 @@ infraestrutura de Auth for implementada.
   <https://supabase.com/docs/reference/javascript/auth-signout>
 - Next.js 16, convenção `proxy.ts`:
   <https://nextjs.org/docs/app/api-reference/file-conventions/proxy>
+- Next.js 16, API assíncrona `cookies()`:
+  <https://nextjs.org/docs/app/api-reference/functions/cookies>
+- Supabase, referência de `getClaims()`:
+  <https://supabase.com/docs/reference/javascript/auth-getclaims>
+- Supabase, prompt oficial atualizado para Next.js 16:
+  <https://supabase.com/docs/guides/ai-tools/ai-prompts/nextjs-supabase-auth>
 
 ## 11. Validações executadas
 
@@ -606,3 +613,91 @@ falha do repositório ou do banco.
 - Nenhuma dependência foi instalada ou atualizada.
 - Nenhum arquivo foi excluído.
 - Nenhum commit, push, vínculo remoto ou deploy foi realizado.
+
+## 13. Implementação da Tarefa 6.2
+
+### Dependência e APIs confirmadas
+
+Foi instalada a versão fixa `@supabase/ssr@0.12.3`, marcada como `latest` no
+registro npm durante a tarefa. Ela declara peer dependency
+`@supabase/supabase-js ^2.110.5`, compatível com a versão `2.110.9` já fixada no
+projeto. Nenhuma atualização geral de pacotes foi executada.
+
+A implementação segue as APIs atuais:
+
+- `createBrowserClient` no navegador;
+- `createServerClient` com `getAll` e `setAll` no servidor e no Proxy;
+- `cookies()` assíncrono do Next.js 16;
+- função nomeada `proxy(request: NextRequest)` em `src/proxy.ts`;
+- `getClaims()` para validar identidade e provocar renovação segura;
+- segundo parâmetro de `setAll` para propagar cabeçalhos anti-cache.
+
+O uso anterior de `createClient` diretamente em
+`src/data/supabase/client.ts` foi removido. Não existe armazenamento manual de
+tokens, `localStorage` paralelo, `getSession()` como prova de identidade nem
+pacote Auth Helpers obsoleto.
+
+### Arquivos e responsabilidades
+
+| Arquivo                        | Responsabilidade                                               |
+| ------------------------------ | -------------------------------------------------------------- |
+| `src/data/supabase/browser.ts` | singleton preguiçoso por aba com configuração pública          |
+| `src/data/supabase/server.ts`  | cliente por requisição e adaptador de cookies do servidor      |
+| `src/data/supabase/proxy.ts`   | renovação, cookies de request/response e cabeçalhos anti-cache |
+| `src/data/supabase/auth.ts`    | identidade mínima obtida de claims verificadas                 |
+| `src/proxy.ts`                 | integração do utilitário ao Proxy do Next.js e matcher         |
+| `src/services/auth.ts`         | normalizações, validações e categorias internas de erro        |
+| `src/types/auth.ts`            | contratos mínimos de identidade, validação e erro              |
+| `vitest.config.ts`             | resolução do alias `@/` na suíte                               |
+
+Os READMEs de `src/services` e `src/types` foram sincronizados com as
+responsabilidades agora implementadas nessas camadas.
+
+O cliente de servidor ignora somente a mensagem específica emitida pelo Next.js
+quando um Server Component tenta escrever cookies. Qualquer outro erro é
+relançado. O Proxy copia cookies renovados para a requisição que segue ao App
+Router e para a resposta enviada ao navegador. Também preserva múltiplos lotes
+de atualização e aplica `Cache-Control`, `Expires` e `Pragma` quando fornecidos
+pelo pacote.
+
+O matcher exclui recursos internos, metadados, imagens, fontes, mapas e outros
+arquivos estáticos, além da rota técnica `reference-image`. Ele não contém
+nenhuma matriz de redirecionamento. A ausência de sessão produz resposta normal,
+sem redirecionar.
+
+### Limites e segurança preservados
+
+Somente `NEXT_PUBLIC_SUPABASE_URL` e
+`NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` são usadas pelos clientes. Não foram
+adicionados segredo, `service_role`, logs de sessão, acesso/refresh token ou
+metadata de autorização.
+
+As quatro migrations, RLS, policies, grants, RPCs e `supabase/config.toml`
+permaneceram inalterados. Cadastro, trigger de provisionamento, Login funcional,
+proteção final, Logout e recursos das etapas seguintes não foram implementados.
+
+### Testes da infraestrutura
+
+Foram criados testes unitários para:
+
+- normalização e validação de e-mail e nome;
+- campos obrigatórios e erros sem detalhes sensíveis;
+- singleton e configuração pública do cliente de navegador;
+- cliente de servidor por requisição, leitura e escrita de cookies;
+- limitação de escrita em Server Components e propagação de erros inesperados;
+- renovação e propagação de cookies/cabeçalhos no Proxy;
+- comportamento sem sessão e ausência de redirecionamento;
+- matcher de rotas e recursos estáticos;
+- mapeamento de claims verificadas para identidade mínima.
+
+A normalização de erros retorna somente categorias internas. Mensagens finais de
+interface permanecem reservadas às tarefas que implementarem Cadastro e Login.
+
+A suíte não depende de conexão remota com Supabase. Cadastro, Login, Logout,
+proteção final e integração com o banco não são cobertos porque ainda não
+existem.
+
+Na validação final da tarefa, `npm run validate` aprovou ESLint, Prettier,
+TypeScript, 31 testes em 7 arquivos e o build de produção do Next.js.
+`git diff --check` e `npm ls @supabase/ssr @supabase/supabase-js` também foram
+aprovados.

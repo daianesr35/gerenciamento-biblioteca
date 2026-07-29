@@ -11,6 +11,18 @@ arquitetura base executável:
 - **Etapa 4 — Design do Sistema:** concluída em 28 de julho de 2026.
 - **Etapa 5 — Modelagem do banco de dados:** concluída; as Tarefas 5.1 a 5.5
   foram concluídas.
+- **Etapa 6 — Autenticação:** em andamento; as Tarefas 6.1 e 6.2 foram
+  concluídas.
+
+A Tarefa 6.2 instalou `@supabase/ssr@0.12.3` e implementou a infraestrutura de
+sessão SSR: cliente de navegador, cliente de servidor por requisição, utilitário
+do Proxy, propagação de cookies, cabeçalhos anti-cache, validação central por
+`getClaims()`, contratos mínimos e validações puras. O cliente antigo de
+`supabase-js` foi substituído para não manter estratégias concorrentes.
+
+O Proxy ainda não redireciona nem protege rotas. Cadastro, provisionamento,
+Login funcional, proteção final e Logout permanecem pendentes para as tarefas
+seguintes. Nenhuma migration, policy, grant ou configuração remota foi alterada.
 
 O repositório possui uma aplicação Next.js tipada e preparada para evolução
 modular. A implementação consolidada da Etapa 4 inclui as dez telas principais,
@@ -168,7 +180,8 @@ adiadas e permanecem pendentes.
 ## Pendências
 
 - Manter as telas auxiliares adiadas para etapa posterior.
-- Iniciar a Etapa 6 — Autenticação somente mediante autorização específica.
+- Iniciar a Tarefa 6.3 — Cadastro, Proprietário e Biblioteca inicial somente
+  mediante autorização específica.
 - Implementar e validar as funcionalidades definitivas previstas na SDD durante
   suas respectivas etapas.
 - Preparar testes integrados e deploy nas respectivas etapas.
@@ -200,8 +213,9 @@ problemas.
 
 ## Próxima etapa recomendada
 
-**Etapa 6 — Autenticação.**
+**Tarefa 6.3 — Cadastro, Proprietário e Biblioteca inicial.**
 
-A Etapa 5 está concluída. Cadastro, login, sessão, logout, cliente de servidor e
-proteção de rotas continuam pendentes e só deverão ser implementados mediante
-autorização específica, seguindo a SDD e o plano técnico oficiais.
+A infraestrutura SSR da Tarefa 6.2 está concluída. A próxima tarefa deverá
+reutilizar os clientes e contratos existentes, criar a migration incremental de
+provisionamento somente pela CLI e implementar Cadastro sem recriar a
+infraestrutura de sessão. A Tarefa 6.3 ainda não foi iniciada.

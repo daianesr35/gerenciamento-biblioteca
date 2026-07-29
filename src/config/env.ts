@@ -4,6 +4,11 @@ type PublicEnvironment = Readonly<{
   supabasePublishableKey: string;
 }>;
 
+type SupabaseEnvironment = Readonly<{
+  supabaseUrl: string;
+  supabasePublishableKey: string;
+}>;
+
 function required(name: string, value: string | undefined): string {
   if (!value) {
     throw new Error(`Variável de ambiente obrigatória ausente: ${name}`);
@@ -12,9 +17,8 @@ function required(name: string, value: string | undefined): string {
   return value;
 }
 
-export function getPublicEnvironment(): PublicEnvironment {
+export function getSupabaseEnvironment(): SupabaseEnvironment {
   return {
-    appUrl: required('NEXT_PUBLIC_APP_URL', process.env.NEXT_PUBLIC_APP_URL),
     supabaseUrl: required(
       'NEXT_PUBLIC_SUPABASE_URL',
       process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -23,5 +27,12 @@ export function getPublicEnvironment(): PublicEnvironment {
       'NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY',
       process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
     ),
+  };
+}
+
+export function getPublicEnvironment(): PublicEnvironment {
+  return {
+    appUrl: required('NEXT_PUBLIC_APP_URL', process.env.NEXT_PUBLIC_APP_URL),
+    ...getSupabaseEnvironment(),
   };
 }
