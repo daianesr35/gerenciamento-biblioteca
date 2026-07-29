@@ -53,3 +53,14 @@ export type UpdateBookResult =
 export type UpdateBookActionState =
   | Readonly<{ status: 'idle' }>
   | UpdateBookResult;
+
+export type DeleteBookResult =
+  | Readonly<{ status: 'success' }>
+  | Readonly<{ status: 'invalid_id' }>
+  | Readonly<{ status: 'not_found' }>
+  | Readonly<{ status: 'related_records' }>
+  | Readonly<{ status: 'error'; category: 'unavailable' }>;
+
+export type DeleteBookActionState =
+  | Readonly<{ status: 'idle' }>
+  | Readonly<{ status: 'error'; message: string }>;

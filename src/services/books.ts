@@ -1,4 +1,5 @@
 import {
+  deleteAuthenticatedBookRow,
   getAuthenticatedBookRow,
   insertAuthenticatedBookRow,
   listAuthenticatedBookRows,
@@ -11,6 +12,7 @@ import type {
   BookListResult,
   CreateBookInput,
   CreateBookResult,
+  DeleteBookResult,
   UpdateBookInput,
   UpdateBookResult,
 } from '@/types/books';
@@ -158,6 +160,29 @@ export async function updateOwnBook(
   try {
     const updated = await updateBook(bookId, normalized);
     return updated ? { status: 'success' } : { status: 'not_found' };
+  } catch {
+    return { status: 'error', category: 'unavailable' };
+  }
+}
+
+type DeleteBook = (
+  bookId: string,
+) => Promise<'deleted' | 'not_found' | 'related_records'>;
+
+export async function deleteOwnBook(
+  bookId: string,
+  deleteBook: DeleteBook = deleteAuthenticatedBookRow,
+): Promise<DeleteBookResult> {
+  if (!UUID_PATTERN.test(bookId)) {
+    return { status: 'invalid_id' };
+  }
+
+  try {
+    const result = await deleteBook(bookId);
+    if (result === 'deleted') {
+      return { status: 'success' };
+    }
+    return { status: result };
   } catch {
     return { status: 'error', category: 'unavailable' };
   }

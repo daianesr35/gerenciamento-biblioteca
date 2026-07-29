@@ -436,3 +436,45 @@ O teste manual autenticado não foi executado.
 
 Exclusão ainda não foi implementada. A Etapa 7 permanece em andamento, e a
 próxima tarefa é a Tarefa 7.7 — Exclusão.
+
+## Conclusão da Tarefa 7.7
+
+A exclusão física segura de Livro foi implementada na rota privada de detalhes.
+O controle exige confirmação explícita, informa que a ação é permanente,
+permite cancelar e desabilita a confirmação durante o envio.
+
+A Server Action específica recebe somente o UUID e chama o service de exclusão.
+O service valida o identificador antes de acessar o adaptador e distingue
+sucesso, ausência segura, relacionamento impeditivo e falha técnica.
+
+O adaptador usa o cliente Supabase SSR por requisição, resolve a Biblioteca da
+sessão autenticada no servidor e executa `DELETE` filtrado explicitamente por
+`biblioteca_id` e UUID, sob a RLS e a policy `livros_delete_proprios`
+existentes. Zero linhas é tratado como Livro inexistente ou inacessível. A
+violação de foreign key é identificada pelo código PostgreSQL `23503` somente
+na camada interna e apresentada ao usuário por mensagem segura.
+
+Solicitações e Empréstimos relacionados não são removidos. As foreign keys com
+`ON DELETE RESTRICT` permanecem preservadas, sem cascata, soft delete, mudança
+de situação, migration ou alteração de policy.
+
+Após uma exclusão confirmada, `/biblioteca` e `/livros/[id]` são revalidados e
+o usuário é redirecionado para `/biblioteca`. Falhas não revalidam nem
+redirecionam e não expõem mensagens do Supabase ou detalhes do banco.
+
+Foram executadas as seguintes verificações:
+
+- testes específicos: 4 arquivos e 19 testes aprovados;
+- ESLint: aprovado;
+- Prettier: aprovado;
+- TypeScript: aprovado;
+- suíte completa: 20 arquivos e 122 testes aprovados;
+- build Next.js: aprovado;
+- rota `/livros/[id]`: dinâmica e renderizada no servidor.
+
+Teste manual autenticado: executado com sucesso. Foram validados o fluxo de
+confirmação e cancelamento, a exclusão real e o redirecionamento para
+`/biblioteca`.
+
+A Etapa 7 permanece em andamento. A próxima tarefa é a Tarefa 7.8 —
+Encerramento e validação do CRUD.

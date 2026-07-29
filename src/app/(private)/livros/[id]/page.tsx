@@ -4,6 +4,8 @@ import type { ReactNode } from 'react';
 import { Badge, ButtonLink, Card, CoverPlaceholder } from '@/components/ui';
 import { getOwnBookById } from '@/services/books';
 
+import { DeleteBookButton } from './delete-book-button';
+
 type DetailIcon = 'arrow' | 'book' | 'edit' | 'isbn' | 'person';
 
 function Icon({ type }: { type: DetailIcon }) {
@@ -158,6 +160,7 @@ export default async function BookDetailsPage({
           </dl>
         </div>
       </Card>
+      <DeleteBookButton bookId={book.id} />
     </div>
   );
 }

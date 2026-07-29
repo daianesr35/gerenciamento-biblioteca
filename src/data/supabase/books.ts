@@ -17,6 +17,8 @@ export type BookRow = Readonly<{
 
 export type CreateBookRowInput = CreateBookInput;
 
+export type DeleteBookRowResult = 'deleted' | 'not_found' | 'related_records';
+
 async function getAuthenticatedLibraryId(
   supabase: SupabaseClient,
 ): Promise<string> {
@@ -113,4 +115,27 @@ export async function updateAuthenticatedBookRow(
   }
 
   return data !== null;
+}
+
+export async function deleteAuthenticatedBookRow(
+  bookId: string,
+): Promise<DeleteBookRowResult> {
+  const supabase = await createSupabaseServerClient();
+  const libraryId = await getAuthenticatedLibraryId(supabase);
+  const { data, error } = await supabase
+    .from('livros')
+    .delete()
+    .eq('biblioteca_id', libraryId)
+    .eq('id', bookId)
+    .select('id')
+    .maybeSingle();
+
+  if (error?.code === '23503') {
+    return 'related_records';
+  }
+  if (error) {
+    throw { code: 'book_delete_unavailable' };
+  }
+
+  return data === null ? 'not_found' : 'deleted';
 }

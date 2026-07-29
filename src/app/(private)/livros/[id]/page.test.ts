@@ -50,11 +50,11 @@ describe('BookDetailsPage', () => {
     expect(html).toContain('alt="Capa de Livro real"');
     expect(html).toContain('href="/biblioteca"');
     expect(html).toContain(`href="/livros/${BOOK_ID}/editar"`);
+    expect(html).toContain('Excluir livro');
     expect(html).not.toContain('O Senhor dos Anéis');
     expect(html).not.toContain('Descrição');
     expect(html).not.toContain('Categorias');
     expect(html).not.toContain('Atividades recentes');
-    expect(html).not.toContain('Excluir');
     expect(html).not.toContain('Emprestar');
     expect(html).not.toContain('Devolver');
     expect(html).not.toContain('Solicitar empréstimo');
