@@ -678,3 +678,38 @@ limitações deliberadas do MVP e as atividades de ambiente, deploy, smoke tests
 e leitura física do QR Code reservadas à Etapa 13.
 
 O candidato está pronto para deploy na Etapa 13.
+
+# Atualização — Tarefa 13.3 e encerramento da Etapa 13
+
+A aplicação publicada em
+`https://gerenciamento-biblioteca.vercel.app` foi validada em 30 de julho de
+2026 com smoke tests executados diretamente no ambiente de produção.
+
+Foram aprovados cadastro e Login, sessão, proteção de rota privada, cadastro
+manual de Livro, consulta por ISBN na Google Books, revisão e persistência dos
+dados retornados, listagem, detalhes, edição e exclusão de Livro, Página Pública,
+criação pública de Solicitação, listagem e confirmação privada da Solicitação,
+criação automática do Empréstimo confirmado, Empréstimo direto, Devolução,
+histórico e Logout. A consulta do ISBN `9780140328721` retornou e permitiu
+persistir os dados de `Fantastic Mr. Fox`.
+
+O QR Code foi renderizado em SVG e o link canônico exibido pela aplicação foi
+aberto com sucesso no catálogo público da Biblioteca. A leitura física com a
+câmera de um dispositivo móvel não pôde ser executada neste ambiente e permanece
+registrada como limitação manual não bloqueadora.
+
+Durante o primeiro ciclo foi identificado um bloqueador na configuração do
+Supabase Auth: a opção de confirmação de e-mail estava habilitada, embora o MVP
+tenha sido implementado e validado para confirmação desabilitada e não possua
+fluxo de callback. Os logs confirmaram `email_not_confirmed`. A correção mínima
+foi aplicada exclusivamente na configuração remota do Supabase, desabilitando
+`Confirm email`. Uma nova conta foi criada depois do ajuste e o Login foi
+aprovado. Não houve alteração de código, tela, componente, regra de negócio,
+Vercel, schema, migration ou arquitetura.
+
+Não foram observados erros no console da aplicação, falhas críticas de navegação
+ou novos problemas de autenticação depois da correção. O Logout removeu a sessão
+e o acesso posterior a uma rota privada foi redirecionado ao Login.
+
+A Tarefa 13.3 e a Etapa 13 estão concluídas. O sistema está pronto para o
+encerramento definitivo do projeto, sem pendências bloqueadoras conhecidas.

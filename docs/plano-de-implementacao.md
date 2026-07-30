@@ -893,7 +893,7 @@ deploy/rollback e documentos técnicos afetados pela configuração final.
 **Critério de conclusão:** deploy concluído, verificado e documentado, sem
 pendências bloqueadoras.
 
-**Status atual:** **Pendente.**
+**Status atual:** **Concluída em 30 de julho de 2026.**
 
 ## 6. Dependências entre etapas
 
