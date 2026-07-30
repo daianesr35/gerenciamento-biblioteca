@@ -58,7 +58,7 @@ tabelas, rotas, tecnologias ou provedores.
 | 6 | Autenticação | Pendente |
 | 7 | Cadastro manual de livros | Pendente |
 | 8 | Integração com Google Books | Concluída |
-| 9 | Página pública da biblioteca e QR Code | Pendente |
+| 9 | Página pública da biblioteca e QR Code | Concluída |
 | 10 | Solicitações de empréstimo | Pendente |
 | 11 | Empréstimos e devoluções | Pendente |
 | 12 | Testes | Pendente |
@@ -634,7 +634,13 @@ banco apenas se decisões efetivas exigirem atualização.
 **Critério de conclusão:** página pública e QR Code funcionais e validados, sem
 criação de solicitações.
 
-**Status atual:** **Pendente.**
+**Status atual:** **Concluída.** As Tarefas 9.1 a 9.4 foram concluídas. A rota
+pública identificável, o catálogo anônimo restrito a Livros disponíveis, a
+pesquisa por título e autor, a tela privada de compartilhamento, a URL canônica,
+o QR Code e as ações de copiar e abrir foram implementados e validados. A
+leitura física do QR Code em celular permanece como verificação pós-deploy,
+quando `NEXT_PUBLIC_APP_URL` apontar para um endereço acessível pelo aparelho.
+Nenhuma solicitação de empréstimo foi antecipada.
 
 ### Etapa 10 — Solicitações de empréstimo
 
@@ -968,4 +974,5 @@ antecipadas durante a Etapa 4.
 
 ## 10. Próxima etapa recomendada
 
-A próxima etapa é a **Etapa 6 — Autenticação**.
+A próxima etapa é a **Etapa 10 — Solicitações de empréstimo**, somente mediante
+autorização específica.

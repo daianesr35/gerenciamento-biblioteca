@@ -16,8 +16,8 @@ arquitetura base executável:
 - **Etapa 7 — Cadastro manual de livros:** em andamento; as Tarefas 7.1, 7.2,
   7.3 e 7.4 foram concluídas.
 - **Etapa 8 — Integração com Google Books:** concluída em 29 de julho de 2026.
-- **Etapa 9 — Página Pública:** em andamento; as Tarefas 9.2 e 9.3 foram
-  concluídas.
+- **Etapa 9 — Página Pública e QR Code:** concluída em 29 de julho de 2026; as
+  Tarefas 9.1, 9.2, 9.3 e 9.4 foram concluídas.
 
 A Tarefa 6.2 instalou `@supabase/ssr@0.12.3` e implementou a infraestrutura de
 sessão SSR: cliente de navegador, cliente de servidor por requisição, utilitário
@@ -60,7 +60,8 @@ o acesso anônimo está restrito a três RPCs mínimas, sem acesso direto às
 tabelas. Cadastro e Login estão conectados ao Auth, e `/biblioteca` lista os
 Livros reais do Proprietário autenticado; as demais telas de domínio continuam
 simuladas. A integração com a Google Books está funcional no cadastro de Livro;
-QR Code funcional e os demais recursos remotos ainda não foram criados. Login,
+QR Code funcional foi implementado; os demais recursos remotos ainda não foram
+criados. Login,
 Dashboard,
 Biblioteca, Cadastro de Livro, Detalhes do Livro, Solicitações, Empréstimos,
 Configurações, Perfil e Página Pública passaram pela revisão visual específica e
@@ -544,3 +545,34 @@ Não foram alterados banco de dados, migrations, RLS, autenticação, sessão,
 Supabase, dependências, arquitetura principal ou a SDD oficial. Nenhuma
 funcionalidade de etapa futura foi antecipada. A Etapa 8 está concluída e o
 projeto está pronto para usar esse resultado como base da Etapa 9.
+
+## Conclusão da Tarefa 9.4 e da Etapa 9
+
+As Tarefas 9.1, 9.2, 9.3 e 9.4 foram concluídas. A Etapa 9 entrega a rota
+pública `/biblioteca/[identificador]`, acesso anônimo exclusivamente pelas RPCs
+públicas existentes, catálogo restrito a Livros disponíveis, pesquisa local por
+título e autor, capa ou placeholder e estados seguros de carregamento,
+Biblioteca inexistente, catálogo vazio, pesquisa sem resultados e
+indisponibilidade temporária.
+
+A rota privada `/pagina-publica` permanece protegida pela autenticação e pela
+RLS. Ela consulta somente `identificador_publico` com o cliente Supabase SSR,
+constrói a URL com `NEXT_PUBLIC_APP_URL`, exibe a mesma URL no campo e no QR
+Code e permite copiar o link ou abrir a Página Pública em nova aba com
+`noopener,noreferrer`. O QR Code SVG gerado por `qrcode.react@4.2.0` possui
+regra visual específica para neutralizar `stroke`.
+
+A validação final aprovou `git diff --check`, ESLint, Prettier, TypeScript, 31
+arquivos com 172 testes automatizados e o build de produção. Não foram
+encontrados defeitos que exigissem correção de código. Banco, tabelas,
+migrations, RLS, grants, RPCs, autenticação e integração Google Books
+permaneceram inalterados, e nenhuma credencial foi adicionada.
+
+Como limitações deliberadas do MVP, não foram implementados solicitações de
+empréstimo, formulário público, empréstimos, devoluções, notificações, download
+ou QR Code por Livro, compartilhamento social, personalização, categorias ou
+paginação. A leitura física do QR Code em celular deverá ser confirmada após o
+deploy, quando `NEXT_PUBLIC_APP_URL` estiver acessível pelo aparelho.
+
+A Etapa 9 está formalmente concluída. A próxima etapa do plano é a **Etapa 10 —
+Solicitações de empréstimo**, que não foi iniciada.
