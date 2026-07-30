@@ -59,7 +59,7 @@ tabelas, rotas, tecnologias ou provedores.
 | 7 | Cadastro manual de livros | Pendente |
 | 8 | Integração com Google Books | Concluída |
 | 9 | Página pública da biblioteca e QR Code | Concluída |
-| 10 | Solicitações de empréstimo | Pendente |
+| 10 | Solicitações de empréstimo | Em andamento |
 | 11 | Empréstimos e devoluções | Pendente |
 | 12 | Testes | Pendente |
 | 13 | Deploy | Pendente |
@@ -704,9 +704,9 @@ controle de disponibilidade definido para livros.
 **Critério de conclusão:** fluxo público e gestão privada de solicitações
 validados, incluindo concorrência e segurança.
 
-**Status atual:** **Em andamento.** A Tarefa 10.2 concluiu o fluxo público de
-criação por meio da RPC `criar_solicitacao_publica`. A gestão privada permanece
-pendente para as tarefas seguintes da Etapa 10.
+**Status atual:** **Em andamento.** As Tarefas 10.2 e 10.3 concluíram,
+respectivamente, o fluxo público de criação e o gerenciamento privado das
+solicitações. A Tarefa 10.4 permanece pendente antes do encerramento da Etapa 10.
 
 ### Etapa 11 — Empréstimos e devoluções
 

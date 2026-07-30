@@ -607,3 +607,17 @@ A Etapa 10 permanece em andamento. Listagem privada, confirmação e recusa de
 solicitações pertencem às tarefas posteriores da própria Etapa 10 e não foram
 antecipadas. Empréstimos e devoluções da Etapa 11 também não foram
 implementados.
+
+# Atualização — Tarefa 10.3
+
+A rota privada `/solicitacoes` lista solicitações reais visíveis pela RLS ao
+proprietário autenticado, com livro, solicitante, telefone, data, estado vazio,
+falha segura e os estados oficiais Pendente, Confirmada e Recusada.
+
+Server Actions, Service, adaptador Supabase de servidor e RPCs privadas
+implementam confirmação e recusa. A confirmação altera atomicamente a
+solicitação para `confirmada` e o livro disponível para `emprestado`; a recusa
+altera somente a solicitação. Nenhum registro em `emprestimos` é criado.
+
+A Tarefa 10.3 está concluída. A Etapa 10 permanece em andamento, com a Tarefa
+10.4 pendente.

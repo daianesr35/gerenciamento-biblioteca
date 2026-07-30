@@ -497,3 +497,15 @@ cliente nem ao repositório. O cliente de servidor continua reservado à Etapa 6
 - **Tarefa 5.5:** vínculo único com `auth.users`, RLS e policies por operação nas
   cinco tabelas, grants mínimos e três RPCs para localização, catálogo
   disponível e criação pública de Solicitação pendente.
+
+# Gerenciamento privado das solicitações
+
+A migration `20260730150000_gerenciar_solicitacoes_privadas.sql` adiciona as
+RPCs privadas mínimas `confirmar_solicitacao_privada(uuid)` e
+`recusar_solicitacao_privada(uuid)`. A confirmação bloqueia a solicitação e o
+livro, exige solicitação pendente e livro disponível e altera ambos
+atomicamente. A recusa altera somente uma solicitação pendente.
+
+O `EXECUTE` foi revogado de `PUBLIC` e `anon` e concedido somente a
+`authenticated`. Ambas validam `auth.uid()` e a propriedade internamente. As
+tabelas continuam com RLS habilitada e nenhum registro em `emprestimos` é criado.
