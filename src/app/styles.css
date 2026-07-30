@@ -3965,6 +3965,23 @@ h3 {
   font-size: 14px;
 }
 
+.loan-create-form {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr auto;
+  align-items: end;
+  gap: 12px;
+  margin-bottom: 18px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--loan-surface);
+}
+
+.loan-create-form > p {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
 .loans-heading .button svg,
 .loans-tabs svg,
 .loans-toolbar svg,
@@ -4131,6 +4148,13 @@ h3 {
 .loan-cover svg {
   width: 23px;
   height: 23px;
+}
+
+.loan-cover img {
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  object-fit: cover;
 }
 
 .loan-book h3 {
@@ -4358,6 +4382,10 @@ h3 {
 }
 
 @media (max-width: 960px) {
+  .loan-create-form {
+    grid-template-columns: 1fr 1fr;
+  }
+
   .loans-toolbar {
     grid-template-columns: 1fr 1fr;
   }
@@ -4381,6 +4409,10 @@ h3 {
 }
 
 @media (max-width: 600px) {
+  .loan-create-form {
+    grid-template-columns: 1fr;
+  }
+
   .loans-heading {
     flex-direction: column;
   }
