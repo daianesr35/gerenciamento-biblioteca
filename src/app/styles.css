@@ -2707,6 +2707,74 @@ h3 {
   text-align: center;
 }
 
+.public-route {
+  width: min(1120px, calc(100% - 32px));
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: 40px 0;
+}
+
+.public-route .public-library-card {
+  overflow: hidden;
+}
+
+.public-route .public-banner h1 {
+  margin: 0 0 5px;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 25px;
+}
+
+.public-route .public-catalog-tools {
+  grid-template-columns: minmax(0, 520px);
+}
+
+.public-catalog-grid {
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+}
+
+.public-cover-image,
+.public-route .cover-placeholder {
+  width: 100%;
+  height: 220px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.public-route .cover-placeholder {
+  display: grid;
+  place-items: center;
+  color: var(--brown-600);
+  background: #f3ece3;
+}
+
+.public-route .cover-placeholder svg {
+  width: 48px;
+  height: 48px;
+}
+
+.public-book-publisher {
+  margin-top: 5px !important;
+  font-size: 11px !important;
+}
+
+.public-route-state {
+  display: grid;
+  min-height: 100vh;
+  padding: 32px;
+  place-content: center;
+  text-align: center;
+}
+
+.public-route-state h1,
+.public-route-state p {
+  margin: 0;
+}
+
+.public-route-state p {
+  margin-top: 10px;
+  color: var(--muted);
+}
+
 .public-how-it-works {
   display: flex;
   align-items: center;
