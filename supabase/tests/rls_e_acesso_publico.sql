@@ -349,6 +349,18 @@ begin
     raise exception 'Identificador inexistente não deveria localizar Biblioteca.';
   end if;
 
+  if public.obter_nome_proprietario_publico(
+    '40000000-0000-0000-0000-000000000001'
+  ) <> 'Proprietário A' then
+    raise exception 'Página Pública deveria exibir o nome do Proprietário A.';
+  end if;
+
+  if public.obter_nome_proprietario_publico(
+    '40000000-0000-0000-0000-000000000099'
+  ) is not null then
+    raise exception 'Identificador inexistente não deveria expor nome.';
+  end if;
+
   if (
     select count(*)
     from public.listar_livros_publicos(

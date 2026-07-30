@@ -1,9 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+import { useActionState, useEffect, useRef, useState } from 'react';
+import { useFormStatus } from 'react-dom';
 
-import { CoverPlaceholder } from '@/components/ui';
+import { Button, CoverPlaceholder, Input } from '@/components/ui';
+import type { PublicLoanRequestActionState } from '@/types/loan-requests';
 import type { PublicBook } from '@/types/public-library';
+
+import { requestLoanAction } from './actions';
+
+const INITIAL_REQUEST_STATE: PublicLoanRequestActionState = { status: 'idle' };
 
 export function filterPublicBooks(
   books: readonly PublicBook[],
@@ -18,9 +24,120 @@ export function filterPublicBooks(
   );
 }
 
-export function PublicCatalog({ books }: { books: readonly PublicBook[] }) {
+function SubmitRequestButton() {
+  const { pending } = useFormStatus();
+
+  return (
+    <Button disabled={pending} type="submit" variant="primary">
+      {pending ? 'Enviando solicitação…' : 'Enviar solicitação'}
+    </Button>
+  );
+}
+
+function PublicRequestForm({
+  book,
+  publicIdentifier,
+  onCreated,
+}: {
+  book: PublicBook;
+  publicIdentifier: string;
+  onCreated: () => void;
+}) {
+  async function submitRequest(
+    previousState: PublicLoanRequestActionState,
+    formData: FormData,
+  ): Promise<PublicLoanRequestActionState> {
+    const result = await requestLoanAction(previousState, formData);
+
+    if (result.status === 'created') {
+      onCreated();
+    }
+
+    return result;
+  }
+
+  const [requestState, requestAction] = useActionState(
+    submitRequest,
+    INITIAL_REQUEST_STATE,
+  );
+  const fieldErrors =
+    requestState.status === 'invalid' ? requestState.fieldErrors : {};
+  const requestError =
+    requestState.status === 'error'
+      ? requestState.category === 'book_unavailable'
+        ? 'Este livro não está mais disponível. Escolha outro livro e tente novamente.'
+        : 'Não foi possível enviar a solicitação. Tente novamente.'
+      : null;
+
+  return (
+    <>
+      <div className="section-heading">
+        <div>
+          <h2 id="public-request-title">Solicitar empréstimo</h2>
+          <p>
+            Livro selecionado: <strong>{book.title}</strong>
+          </p>
+        </div>
+      </div>
+      <form action={requestAction}>
+        <input name="publicIdentifier" type="hidden" value={publicIdentifier} />
+        <input name="bookId" type="hidden" value={book.id} />
+        <Input
+          autoComplete="name"
+          error={fieldErrors.requesterName}
+          label="Nome"
+          name="requesterName"
+          required
+        />
+        <Input
+          autoComplete="tel"
+          error={fieldErrors.requesterPhone}
+          label="Telefone"
+          name="requesterPhone"
+          required
+          type="tel"
+        />
+        {requestError && (
+          <p
+            aria-live="polite"
+            className="public-request-message error"
+            role="alert"
+          >
+            {requestError}
+          </p>
+        )}
+        <SubmitRequestButton />
+      </form>
+    </>
+  );
+}
+
+export function PublicCatalog({
+  books,
+  publicIdentifier,
+}: {
+  books: readonly PublicBook[];
+  publicIdentifier: string;
+}) {
   const [search, setSearch] = useState('');
+  const [selectedBookId, setSelectedBookId] = useState('');
+  const [requestSubmitted, setRequestSubmitted] = useState(false);
+  const requestSectionRef = useRef<HTMLElement>(null);
   const filteredBooks = filterPublicBooks(books, search);
+  const selectedBook = books.find((book) => book.id === selectedBookId);
+
+  useEffect(() => {
+    if (!selectedBook) {
+      return;
+    }
+
+    requestSectionRef.current?.scrollIntoView({
+      behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches
+        ? 'auto'
+        : 'smooth',
+      block: 'start',
+    });
+  }, [selectedBook]);
 
   return (
     <>
@@ -44,7 +161,12 @@ export function PublicCatalog({ books }: { books: readonly PublicBook[] }) {
         </div>
         <div className="public-book-grid public-catalog-grid">
           {filteredBooks.map((book) => (
-            <article className="public-book" key={book.id}>
+            <article
+              className={`public-book ${
+                selectedBookId === book.id ? 'selected' : ''
+              }`}
+              key={book.id}
+            >
               {book.coverImageUrl ? (
                 // A URL é um dado bibliográfico e pode ter qualquer host.
                 // eslint-disable-next-line @next/next/no-img-element
@@ -63,6 +185,17 @@ export function PublicCatalog({ books }: { books: readonly PublicBook[] }) {
               {book.publisher && (
                 <p className="public-book-publisher">{book.publisher}</p>
               )}
+              <Button
+                aria-pressed={selectedBookId === book.id}
+                onClick={() => {
+                  setRequestSubmitted(false);
+                  setSelectedBookId(book.id);
+                }}
+                type="button"
+                variant={selectedBookId === book.id ? 'primary' : 'secondary'}
+              >
+                {selectedBookId === book.id ? 'Selecionado' : 'Solicitar'}
+              </Button>
             </article>
           ))}
         </div>
@@ -72,6 +205,31 @@ export function PublicCatalog({ books }: { books: readonly PublicBook[] }) {
           </p>
         )}
       </section>
+      {selectedBook && (
+        <section
+          aria-labelledby="public-request-title"
+          className="public-request"
+          ref={requestSectionRef}
+        >
+          <PublicRequestForm
+            book={selectedBook}
+            onCreated={() => {
+              setSelectedBookId('');
+              setRequestSubmitted(true);
+            }}
+            publicIdentifier={publicIdentifier}
+          />
+        </section>
+      )}
+      {requestSubmitted && (
+        <p
+          aria-live="polite"
+          className="public-request-message public-request-success success"
+          role="status"
+        >
+          Solicitação enviada com sucesso.
+        </p>
+      )}
     </>
   );
 }

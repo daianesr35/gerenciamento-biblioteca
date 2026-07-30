@@ -2597,6 +2597,8 @@ h3 {
 }
 
 .public-book {
+  display: flex;
+  flex-direction: column;
   min-width: 0;
   padding: 0 18px;
   border-right: 1px solid var(--border);
@@ -2718,8 +2720,16 @@ h3 {
   overflow: hidden;
 }
 
+.public-route .public-books {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
 .public-route .public-banner h1 {
   margin: 0 0 5px;
+  color: white;
   font-family: Georgia, 'Times New Roman', serif;
   font-size: 25px;
 }
@@ -2740,6 +2750,11 @@ h3 {
   object-fit: cover;
 }
 
+.public-route .public-cover-image {
+  max-height: none;
+  padding: 0;
+}
+
 .public-route .cover-placeholder {
   display: grid;
   place-items: center;
@@ -2755,6 +2770,65 @@ h3 {
 .public-book-publisher {
   margin-top: 5px !important;
   font-size: 11px !important;
+}
+
+.public-book .button {
+  width: 100%;
+  margin-top: auto;
+}
+
+.public-book.selected {
+  border-radius: 8px;
+  outline: 2px solid var(--brown-600);
+  outline-offset: 6px;
+}
+
+.public-request {
+  scroll-margin-top: 24px;
+  padding: 24px;
+  background: transparent;
+}
+
+.public-request .section-heading {
+  margin-bottom: 18px;
+}
+
+.public-request .section-heading h2 {
+  margin-bottom: 6px;
+}
+
+.public-request .section-heading p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.public-request form {
+  display: grid;
+  max-width: 520px;
+  gap: 16px;
+}
+
+.public-request-message {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 8px;
+}
+
+.public-request-message.success {
+  color: var(--success);
+  background: var(--success-bg);
+}
+
+.public-request-success {
+  margin: 0 20px 20px;
+}
+
+.public-request-message.error {
+  background: var(--danger-bg);
+}
+
+.public-request form .button {
+  justify-self: start;
 }
 
 .public-route-state {
@@ -3533,6 +3607,15 @@ h3 {
   .public-book:nth-child(even) {
     padding-right: 0;
     border-right: 0;
+  }
+
+  .public-request {
+    scroll-margin-top: 12px;
+    padding: 20px 16px;
+  }
+
+  .public-request form .button {
+    width: 100%;
   }
 
   .public-how-it-works {

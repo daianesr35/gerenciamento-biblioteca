@@ -19,6 +19,7 @@ describe('Página da Biblioteca pública', () => {
   it('exibe banner neutro e somente os dados públicos dos livros', async () => {
     getPublicLibraryMock.mockResolvedValue({
       status: 'success',
+      ownerName: 'Maria da Silva',
       books: [
         {
           id: 'livro-1',
@@ -38,12 +39,12 @@ describe('Página da Biblioteca pública', () => {
     );
 
     expect(getPublicLibraryMock).toHaveBeenCalledWith(IDENTIFIER);
-    expect(html).toContain('Biblioteca pessoal');
+    expect(html).toContain('Biblioteca de Maria da Silva');
     expect(html).toContain('Livro real');
     expect(html).toContain('Autora real');
     expect(html).toContain('Editora real');
     expect(html).toContain('Capa indisponível de Livro real');
-    expect(html).not.toContain('Solicitar');
+    expect(html).toContain('Solicitar');
     expect(html).not.toContain('QR Code');
     expect(html).not.toContain('Configurações');
     expect(html).not.toContain('href=');
@@ -58,7 +59,10 @@ describe('Página da Biblioteca pública', () => {
     );
     expect(missing).toContain('Biblioteca não encontrada');
 
-    getPublicLibraryMock.mockResolvedValueOnce({ status: 'empty' });
+    getPublicLibraryMock.mockResolvedValueOnce({
+      status: 'empty',
+      ownerName: 'Maria da Silva',
+    });
     const empty = renderToStaticMarkup(
       await PublicLibraryPage({
         params: Promise.resolve({ identificador: IDENTIFIER }),
@@ -92,7 +96,9 @@ describe('Página da Biblioteca pública', () => {
         coverImageUrl: null,
       },
     ];
-    const html = renderToStaticMarkup(<PublicCatalog books={books} />);
+    const html = renderToStaticMarkup(
+      <PublicCatalog books={books} publicIdentifier={IDENTIFIER} />,
+    );
 
     expect(html).toContain('Pesquisar por título ou autor');
     expect(html).toContain('Dom Casmurro');
@@ -101,9 +107,33 @@ describe('Página da Biblioteca pública', () => {
     expect(filterPublicBooks(books, 'MACHADO')).toHaveLength(1);
     expect(filterPublicBooks(books, 'clarice')).toHaveLength(0);
 
-    const emptySearch = renderToStaticMarkup(<PublicCatalog books={[]} />);
+    const emptySearch = renderToStaticMarkup(
+      <PublicCatalog books={[]} publicIdentifier={IDENTIFIER} />,
+    );
     expect(emptySearch).toContain(
       'Nenhum livro encontrado para esta pesquisa.',
     );
+  });
+
+  it('oferece a seleção do livro antes de abrir o formulário', () => {
+    const html = renderToStaticMarkup(
+      <PublicCatalog
+        books={[
+          {
+            id: '223e4567-e89b-42d3-a456-426614174000',
+            isbn: null,
+            title: 'Livro disponível',
+            author: 'Autora',
+            publisher: null,
+            coverImageUrl: null,
+          },
+        ]}
+        publicIdentifier={IDENTIFIER}
+      />,
+    );
+
+    expect(html).toContain('Solicitar');
+    expect(html).not.toContain('name="requesterName"');
+    expect(html).not.toContain('name="requesterPhone"');
   });
 });

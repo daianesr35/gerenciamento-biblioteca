@@ -1,0 +1,40 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { submitPublicLoanRequest } from '@/services/loan-requests';
+
+import { requestLoanAction } from './actions';
+
+vi.mock('@/services/loan-requests', () => ({
+  submitPublicLoanRequest: vi.fn(),
+}));
+
+const submitPublicLoanRequestMock = vi.mocked(submitPublicLoanRequest);
+
+describe('Server Action da solicitação pública', () => {
+  beforeEach(() => submitPublicLoanRequestMock.mockReset());
+
+  it('lê os campos e retorna o resultado seguro do Service', async () => {
+    submitPublicLoanRequestMock.mockResolvedValue({
+      status: 'created',
+      requestId: 'solicitacao-1',
+    });
+    const formData = new FormData();
+    formData.set('publicIdentifier', '123e4567-e89b-42d3-a456-426614174000');
+    formData.set('bookId', '223e4567-e89b-42d3-a456-426614174000');
+    formData.set('requesterName', 'Ana');
+    formData.set('requesterPhone', '11999990000');
+
+    await expect(
+      requestLoanAction({ status: 'idle' }, formData),
+    ).resolves.toEqual({
+      status: 'created',
+      requestId: 'solicitacao-1',
+    });
+    expect(submitPublicLoanRequestMock).toHaveBeenCalledWith({
+      publicIdentifier: '123e4567-e89b-42d3-a456-426614174000',
+      bookId: '223e4567-e89b-42d3-a456-426614174000',
+      requesterName: 'Ana',
+      requesterPhone: '11999990000',
+    });
+  });
+});

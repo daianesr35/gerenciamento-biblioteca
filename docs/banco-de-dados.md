@@ -348,10 +348,13 @@ chave estrangeira. `INSERT` usa `WITH CHECK`; leitura e exclusão usam `USING`.
 ### Acesso público mínimo
 
 `anon` não possui privilégio direto sobre nenhuma tabela do domínio e não
-possui policy de tabela. O fluxo público usa três funções:
+possui policy de tabela. O fluxo público usa quatro funções:
 
 - `localizar_biblioteca_publica(uuid)`: informa somente se o identificador
   público exato corresponde a uma Biblioteca;
+- `obter_nome_proprietario_publico(uuid)`: retorna somente o nome do
+  Proprietário vinculado ao identificador público exato, para identificação no
+  banner da Página Pública;
 - `listar_livros_publicos(uuid)`: retorna somente `id`, `isbn`, `titulo`,
   `autor`, `editora` e `imagem_capa` de Livros com situação `disponivel` da
   Biblioteca indicada;

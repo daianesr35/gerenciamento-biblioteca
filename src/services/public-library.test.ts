@@ -25,7 +25,7 @@ describe('service da Biblioteca pública', () => {
   });
 
   it('diferencia Biblioteca inexistente sem listar livros', async () => {
-    const locate = vi.fn(async () => false);
+    const locate = vi.fn(async () => null);
     const list = vi.fn();
 
     await expect(getPublicLibrary(IDENTIFIER, locate, list)).resolves.toEqual({
@@ -38,21 +38,22 @@ describe('service da Biblioteca pública', () => {
     await expect(
       getPublicLibrary(
         IDENTIFIER,
-        vi.fn(async () => true),
+        vi.fn(async () => 'Maria'),
         vi.fn(async () => []),
       ),
-    ).resolves.toEqual({ status: 'empty' });
+    ).resolves.toEqual({ status: 'empty', ownerName: 'Maria' });
   });
 
   it('mapeia o catálogo de uma Biblioteca existente', async () => {
     await expect(
       getPublicLibrary(
         IDENTIFIER,
-        vi.fn(async () => true),
+        vi.fn(async () => 'Maria'),
         vi.fn(async () => [ROW]),
       ),
     ).resolves.toEqual({
       status: 'success',
+      ownerName: 'Maria',
       books: [
         {
           id: 'livro-1',

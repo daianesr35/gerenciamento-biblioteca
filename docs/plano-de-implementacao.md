@@ -704,7 +704,9 @@ controle de disponibilidade definido para livros.
 **Critério de conclusão:** fluxo público e gestão privada de solicitações
 validados, incluindo concorrência e segurança.
 
-**Status atual:** **Pendente.**
+**Status atual:** **Em andamento.** A Tarefa 10.2 concluiu o fluxo público de
+criação por meio da RPC `criar_solicitacao_publica`. A gestão privada permanece
+pendente para as tarefas seguintes da Etapa 10.
 
 ### Etapa 11 — Empréstimos e devoluções
 

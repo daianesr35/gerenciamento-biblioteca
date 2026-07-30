@@ -8,8 +8,12 @@ export type PublicBook = Readonly<{
 }>;
 
 export type PublicLibraryResult =
-  | Readonly<{ status: 'success'; books: readonly PublicBook[] }>
+  | Readonly<{
+      status: 'success';
+      ownerName: string;
+      books: readonly PublicBook[];
+    }>
   | Readonly<{ status: 'invalid_id' }>
   | Readonly<{ status: 'not_found' }>
-  | Readonly<{ status: 'empty' }>
+  | Readonly<{ status: 'empty'; ownerName: string }>
   | Readonly<{ status: 'error'; category: 'unavailable' }>;

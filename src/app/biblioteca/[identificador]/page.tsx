@@ -46,7 +46,7 @@ export default async function PublicLibraryPage({
             <BookIcon />
           </span>
           <div>
-            <h1 id="library-name">Biblioteca pessoal</h1>
+            <h1 id="library-name">Biblioteca de {result.ownerName}</h1>
             <p>Livros disponíveis para consulta.</p>
           </div>
         </div>
@@ -55,7 +55,10 @@ export default async function PublicLibraryPage({
             Esta biblioteca ainda não possui livros disponíveis.
           </p>
         ) : (
-          <PublicCatalog books={result.books} />
+          <PublicCatalog
+            books={result.books}
+            publicIdentifier={identificador}
+          />
         )}
       </section>
     </main>

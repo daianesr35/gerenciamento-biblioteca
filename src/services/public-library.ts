@@ -1,6 +1,6 @@
 import {
+  getPublicOwnerName,
   listPublicBookRows,
-  locatePublicLibrary,
   type PublicBookRow,
 } from '@/data/supabase/public';
 import type { PublicBook, PublicLibraryResult } from '@/types/public-library';
@@ -19,12 +19,12 @@ export function mapPublicBookRow(row: PublicBookRow): PublicBook {
   };
 }
 
-type LocateLibrary = (identifier: string) => Promise<boolean>;
+type GetOwnerName = (identifier: string) => Promise<string | null>;
 type ListBooks = (identifier: string) => Promise<readonly PublicBookRow[]>;
 
 export async function getPublicLibrary(
   identifier: string,
-  locateLibrary: LocateLibrary = locatePublicLibrary,
+  getOwnerName: GetOwnerName = getPublicOwnerName,
   listBooks: ListBooks = listPublicBookRows,
 ): Promise<PublicLibraryResult> {
   if (!UUID_PATTERN.test(identifier)) {
@@ -32,14 +32,16 @@ export async function getPublicLibrary(
   }
 
   try {
-    if (!(await locateLibrary(identifier))) {
+    const ownerName = await getOwnerName(identifier);
+
+    if (!ownerName) {
       return { status: 'not_found' };
     }
 
     const books = (await listBooks(identifier)).map(mapPublicBookRow);
     return books.length === 0
-      ? { status: 'empty' }
-      : { status: 'success', books };
+      ? { status: 'empty', ownerName }
+      : { status: 'success', ownerName, books };
   } catch {
     return { status: 'error', category: 'unavailable' };
   }

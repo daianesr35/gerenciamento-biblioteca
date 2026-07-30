@@ -1,6 +1,7 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
 import { getSupabaseEnvironment } from '@/config/env';
+import type { PublicLoanRequestInput } from '@/types/loan-requests';
 
 export type PublicBookRow = Readonly<{
   id: string;
@@ -42,6 +43,21 @@ export async function locatePublicLibrary(
   return data === true;
 }
 
+export async function getPublicOwnerName(
+  identifier: string,
+): Promise<string | null> {
+  const { data, error } = await createPublicSupabaseClient().rpc(
+    'obter_nome_proprietario_publico',
+    { p_identificador_publico: identifier },
+  );
+
+  if (error) {
+    throw { code: 'public_owner_unavailable' };
+  }
+
+  return typeof data === 'string' ? data : null;
+}
+
 export async function listPublicBookRows(
   identifier: string,
 ): Promise<readonly PublicBookRow[]> {
@@ -55,4 +71,30 @@ export async function listPublicBookRows(
   }
 
   return (data ?? []) as PublicBookRow[];
+}
+
+export async function createPublicLoanRequest(
+  input: PublicLoanRequestInput,
+): Promise<Readonly<{ requestId: string }>> {
+  const { data, error } = await createPublicSupabaseClient().rpc(
+    'criar_solicitacao_publica',
+    {
+      p_identificador_publico: input.publicIdentifier,
+      p_livro_id: input.bookId,
+      p_nome_solicitante: input.requesterName,
+      p_telefone_solicitante: input.requesterPhone,
+    },
+  );
+
+  if (error) {
+    throw {
+      code: error.code === 'P0001' ? 'book_unavailable' : 'request_unavailable',
+    };
+  }
+
+  if (typeof data !== 'string') {
+    throw { code: 'request_unavailable' };
+  }
+
+  return { requestId: data };
 }

@@ -576,3 +576,34 @@ deploy, quando `NEXT_PUBLIC_APP_URL` estiver acessível pelo aparelho.
 
 A Etapa 9 está formalmente concluída. A próxima etapa do plano é a **Etapa 10 —
 Solicitações de empréstimo**, que não foi iniciada.
+
+## Conclusão da Tarefa 10.2
+
+A Página Pública permite selecionar um Livro disponível, informar nome e
+telefone e enviar uma solicitação de empréstimo. O fluxo utiliza Server Action,
+Service, adaptador e o cliente Supabase público existentes, e persiste a
+solicitação exclusivamente pela RPC `criar_solicitacao_publica`.
+
+O formulário apresenta estados de envio, sucesso e erro, impede novo envio
+enquanto a requisição está em andamento e não exibe detalhes internos do banco.
+Nome e telefone são validados no Service, enquanto pertencimento à Biblioteca,
+existência e disponibilidade do Livro, data e status inicial `pendente`
+continuam sob autoridade da RPC.
+
+Foram adicionados testes do Service, adaptador, Server Action e integração
+inicial do formulário com o catálogo público. Como pequeno ajuste complementar
+solicitado durante os testes manuais, o banner da Página Pública passou a
+exibir o nome do Proprietário. O contrato da Biblioteca pública foi atualizado
+para incluir esse nome, consultado exclusivamente pela nova RPC pública
+`obter_nome_proprietario_publico`, criada por migration versionada com concessão
+mínima de `EXECUTE` ao papel `anon`.
+
+O papel `anon` continua sem acesso direto às tabelas e não recebeu grant de
+leitura. A exposição permanece limitada ao nome retornado pela RPC controlada;
+nenhuma policy RLS foi alterada ou enfraquecida. A SDD oficial do sistema, o QR
+Code e o fluxo de compartilhamento permaneceram inalterados.
+
+A Etapa 10 permanece em andamento. Listagem privada, confirmação e recusa de
+solicitações pertencem às tarefas posteriores da própria Etapa 10 e não foram
+antecipadas. Empréstimos e devoluções da Etapa 11 também não foram
+implementados.
