@@ -704,9 +704,10 @@ controle de disponibilidade definido para livros.
 **Critério de conclusão:** fluxo público e gestão privada de solicitações
 validados, incluindo concorrência e segurança.
 
-**Status atual:** **Em andamento.** As Tarefas 10.2 e 10.3 concluíram,
+**Status atual:** **Concluída.** As Tarefas 10.2 e 10.3 concluíram,
 respectivamente, o fluxo público de criação e o gerenciamento privado das
-solicitações. A Tarefa 10.4 permanece pendente antes do encerramento da Etapa 10.
+solicitações. A Tarefa 10.4 validou os critérios de conclusão e encerrou
+formalmente a Etapa 10, sem antecipar funcionalidades da Etapa 11.
 
 ### Etapa 11 — Empréstimos e devoluções
 

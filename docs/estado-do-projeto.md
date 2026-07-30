@@ -621,3 +621,18 @@ altera somente a solicitação. Nenhum registro em `emprestimos` é criado.
 
 A Tarefa 10.3 está concluída. A Etapa 10 permanece em andamento, com a Tarefa
 10.4 pendente.
+
+# Atualização — Tarefa 10.4
+
+Os fluxos público e privado implementados nas Tarefas 10.2 e 10.3 atendem ao
+escopo e aos critérios de conclusão da Etapa 10: criação pública restrita a
+livros disponíveis, status inicial `pendente`, isolamento por biblioteca,
+listagem privada, confirmação e recusa, além da confirmação atômica com
+proteção contra processamento concorrente ou repetido.
+
+Não foi identificada pendência funcional adicional para o encerramento. Nenhum
+ajuste de código ou banco de dados foi necessário, e nenhuma funcionalidade de
+empréstimos, devoluções, histórico, notificações, lembretes ou reservas foi
+antecipada.
+
+A Tarefa 10.4 e a Etapa 10 estão concluídas.
