@@ -16,6 +16,8 @@ arquitetura base executável:
 - **Etapa 7 — Cadastro manual de livros:** em andamento; as Tarefas 7.1, 7.2,
   7.3 e 7.4 foram concluídas.
 - **Etapa 8 — Integração com Google Books:** concluída em 29 de julho de 2026.
+- **Etapa 9 — Página Pública:** em andamento; as Tarefas 9.2 e 9.3 foram
+  concluídas.
 
 A Tarefa 6.2 instalou `@supabase/ssr@0.12.3` e implementou a infraestrutura de
 sessão SSR: cliente de navegador, cliente de servidor por requisição, utilitário

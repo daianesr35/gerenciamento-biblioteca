@@ -2862,27 +2862,23 @@ h3 {
   margin: 8px auto 16px;
   border: 15px solid white;
   border-radius: 7px;
-  background:
-    radial-gradient(
-      circle at 18% 18%,
-      transparent 0 7%,
-      #17120f 7% 14%,
-      transparent 14%
-    ),
-    radial-gradient(
-      circle at 82% 18%,
-      transparent 0 7%,
-      #17120f 7% 14%,
-      transparent 14%
-    ),
-    radial-gradient(
-      circle at 18% 82%,
-      transparent 0 7%,
-      #17120f 7% 14%,
-      transparent 14%
-    ),
-    repeating-conic-gradient(#17120f 0 25%, white 0 50%) 50% / 16px 16px;
+  background: white;
   box-shadow: 0 0 0 1px var(--border);
+}
+
+.public-qr svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  stroke: none;
+}
+
+.public-copy-feedback {
+  min-height: 20px;
+  margin: 8px 0 0;
+  color: var(--success);
+  font-size: 12px;
+  font-weight: 700;
 }
 
 .public-setting {
