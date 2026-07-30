@@ -137,14 +137,22 @@ begin
     raise exception 'Recusa válida alterou dados incorretamente.';
   end if;
 
+  if (
+    select count(*) from public.emprestimos
+    where solicitacao_id = '61000000-0000-0000-0000-000000000001'
+      and livro_id = '51000000-0000-0000-0000-000000000001'
+      and nome_solicitante = 'Confirmar'
+      and telefone_solicitante = '1101'
+      and data_devolucao is null
+  ) <> 1 then
+    raise exception 'A confirmação deve criar exatamente um Empréstimo correspondente.';
+  end if;
+
   if exists (
     select 1 from public.emprestimos
-    where solicitacao_id in (
-      '61000000-0000-0000-0000-000000000001',
-      '61000000-0000-0000-0000-000000000002'
-    )
+    where solicitacao_id = '61000000-0000-0000-0000-000000000002'
   ) then
-    raise exception 'As RPCs privadas não devem criar Empréstimos.';
+    raise exception 'A recusa não deve criar Empréstimo.';
   end if;
 end;
 $$;

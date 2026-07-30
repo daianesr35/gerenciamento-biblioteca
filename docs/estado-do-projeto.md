@@ -636,3 +636,21 @@ empréstimos, devoluções, histórico, notificações, lembretes ou reservas fo
 antecipada.
 
 A Tarefa 10.4 e a Etapa 10 estão concluídas.
+
+# Atualização — Tarefa 11.4 e Etapa 11
+
+A Etapa 11 — Empréstimos e Devoluções está concluída. A confirmação de uma
+solicitação cria exatamente um empréstimo e sincroniza `solicitacoes`,
+`emprestimos` e `livros`; o backfill conservador trata solicitações confirmadas
+anteriores; o empréstimo direto e a devolução são atômicos, autenticados e
+isolados por proprietário.
+
+A rota `/emprestimos` utiliza dados reais, preserva o design aprovado e a
+responsividade e atualiza listagem, abas e indicadores após as operações. A
+validação final aprovou `git diff --check`, ESLint, Prettier, TypeScript, 41
+arquivos com 200 testes automatizados, build de produção, recriação integral do
+banco, ordem das migrations, scripts SQL transacionais, lint do banco e
+advisors locais de segurança e desempenho.
+
+Não foram encontrados defeitos impeditivos nem regressões, e nenhuma
+funcionalidade nova foi adicionada. A próxima etapa é a **Etapa 12 — Testes**.
