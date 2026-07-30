@@ -654,3 +654,27 @@ advisors locais de segurança e desempenho.
 
 Não foram encontrados defeitos impeditivos nem regressões, e nenhuma
 funcionalidade nova foi adicionada. A próxima etapa é a **Etapa 12 — Testes**.
+
+# Atualização — Etapa 12
+
+A Etapa 12 — Consolidação e Validação Final (Expressa) está concluída. A matriz
+objetiva em `docs/matriz-rastreabilidade-etapa12.md` relaciona todos os critérios
+de funcionamento da SDD oficial às evidências automatizadas e SQL existentes.
+Não foi identificada lacuna essencial de cobertura, portanto nenhum teste novo
+foi criado.
+
+Foram aprovados `git diff --check`, ESLint, Prettier, TypeScript, 41 arquivos
+com 200 testes automatizados, build de produção, recriação limpa do banco com
+as oito migrations, os quatro scripts SQL transacionais, lint do schema
+`public` e advisors locais de segurança e desempenho. RLS, isolamento, grants,
+operações atômicas, sincronização dos estados e ausência de segredos ou
+temporários versionados também foram verificados.
+
+A CLI de testes SQL retorna código 1 somente porque os scripts `DO/RAISE`
+existentes não emitem plano TAP; a execução direta com
+`psql -v ON_ERROR_STOP=1` aprovou os quatro arquivos. Não foram encontrados
+defeitos críticos, não houve alteração de código e permanecem apenas as
+limitações deliberadas do MVP e as atividades de ambiente, deploy, smoke tests
+e leitura física do QR Code reservadas à Etapa 13.
+
+O candidato está pronto para deploy na Etapa 13.
