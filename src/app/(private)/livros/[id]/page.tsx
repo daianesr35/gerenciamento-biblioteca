@@ -157,6 +157,9 @@ export default async function BookDetailsPage({
             <MetaItem icon="book" label="Editora">
               {book.publisher ?? 'Não informado'}
             </MetaItem>
+            <MetaItem icon="book" label="Categoria">
+              {book.category ?? 'Não informado'}
+            </MetaItem>
           </dl>
         </div>
       </Card>

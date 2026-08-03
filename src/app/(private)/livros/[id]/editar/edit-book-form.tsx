@@ -48,6 +48,11 @@ export function EditBookForm({ book }: { book: Book }) {
         name="publisher"
       />
       <Input
+        defaultValue={book.category ?? ''}
+        label="Categoria"
+        name="category"
+      />
+      <Input
         defaultValue={book.coverImageUrl ?? ''}
         error={fieldErrors.coverImageUrl}
         label="URL da capa"

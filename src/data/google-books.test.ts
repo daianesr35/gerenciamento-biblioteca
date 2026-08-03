@@ -26,7 +26,7 @@ describe('adaptador da Google Books', () => {
     expect(Object.fromEntries(url.searchParams)).toEqual({
       q: 'isbn:9781234567890',
       printType: 'books',
-      projection: 'lite',
+      projection: 'full',
       maxResults: '1',
       key: 'private-key',
     });

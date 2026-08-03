@@ -13,6 +13,7 @@ describe('página de cadastro de Livro', () => {
       'isbn',
       'publisher',
       'coverImageUrl',
+      'category',
     ]) {
       expect(html).toContain(`name="${field}"`);
     }

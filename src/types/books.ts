@@ -7,6 +7,7 @@ export type Book = Readonly<{
   author: string;
   publisher: string | null;
   coverImageUrl: string | null;
+  category: string | null;
   status: BookStatus;
 }>;
 
@@ -26,6 +27,7 @@ export type CreateBookInput = Readonly<{
   author: string;
   publisher: string | null;
   coverImageUrl: string | null;
+  category?: string | null;
 }>;
 
 export type CreateBookFieldErrors = Partial<

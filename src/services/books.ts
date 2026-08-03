@@ -28,6 +28,7 @@ export function mapBookRow(row: BookRow): Book {
     author: row.autor,
     publisher: row.editora,
     coverImageUrl: row.imagem_capa,
+    category: row.categoria,
     status: row.situacao,
   };
 }
@@ -84,6 +85,7 @@ export async function createOwnBook(
     author: input.author.trim(),
     publisher: normalizeOptional(input.publisher),
     coverImageUrl: normalizeOptional(input.coverImageUrl),
+    category: normalizeOptional(input.category ?? null),
   };
   const fieldErrors: Record<string, string> = {};
 
@@ -133,6 +135,7 @@ export async function updateOwnBook(
     author: input.author.trim(),
     publisher: normalizeOptional(input.publisher),
     coverImageUrl: normalizeOptional(input.coverImageUrl),
+    category: normalizeOptional(input.category ?? null),
   };
   const fieldErrors: Record<string, string> = {};
 

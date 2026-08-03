@@ -24,7 +24,7 @@ devoluções.
 - cadastro, login, sessão protegida e logout;
 - cadastro manual e consulta de livros por ISBN;
 - listagem, detalhes, edição e exclusão de livros;
-- página pública da biblioteca com QR Code;
+- página pública com QR Code, recomendações e seleção de múltiplos livros;
 - criação e gerenciamento de solicitações públicas;
 - registro de empréstimos, devoluções e histórico;
 - isolamento dos dados de cada biblioteca com RLS.

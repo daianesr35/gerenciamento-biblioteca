@@ -42,7 +42,7 @@ export async function fetchGoogleBookByIsbn(
   const url = new URL(GOOGLE_BOOKS_URL);
   url.searchParams.set('q', `isbn:${isbn}`);
   url.searchParams.set('printType', 'books');
-  url.searchParams.set('projection', 'lite');
+  url.searchParams.set('projection', 'full');
   url.searchParams.set('maxResults', '1');
   url.searchParams.set('key', apiKey);
 

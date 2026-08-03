@@ -37,7 +37,7 @@ describe('Server Action de exclusão de Livro', () => {
     [{ status: 'not_found' }, 'Não foi possível excluir o livro.'],
     [
       { status: 'related_records' },
-      'Este livro não pode ser excluído porque possui solicitações ou empréstimos relacionados.',
+      'Este livro não pode ser excluído enquanto estiver emprestado.',
     ],
     [
       { status: 'error', category: 'unavailable' },

@@ -10,6 +10,7 @@ export type PublicBookRow = Readonly<{
   autor: string;
   editora: string | null;
   imagem_capa: string | null;
+  categoria: string | null;
 }>;
 
 export function createPublicSupabaseClient(): SupabaseClient {

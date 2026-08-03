@@ -16,8 +16,7 @@ export async function deleteBookAction(
   if (result.status === 'related_records') {
     return {
       status: 'error',
-      message:
-        'Este livro não pode ser excluído porque possui solicitações ou empréstimos relacionados.',
+      message: 'Este livro não pode ser excluído enquanto estiver emprestado.',
     };
   }
   if (result.status === 'invalid_id' || result.status === 'not_found') {

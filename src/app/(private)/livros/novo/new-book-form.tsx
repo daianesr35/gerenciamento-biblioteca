@@ -22,6 +22,7 @@ const INITIAL_VALUES: NewBookFormValues = {
   isbn: '',
   publisher: '',
   coverImageUrl: '',
+  category: '',
 };
 
 export function mergeBookValues(
@@ -38,6 +39,7 @@ export function mergeBookValues(
     isbn: result.book.isbn || current.isbn,
     publisher: result.book.publisher || current.publisher,
     coverImageUrl: result.book.coverImageUrl || current.coverImageUrl,
+    category: result.book.category || current.category,
   };
 }
 
@@ -122,6 +124,13 @@ export function NewBookForm() {
         onChange={(event) => updateField('publisher', event.target.value)}
         placeholder="Ex.: Companhia das Letras"
         value={values.publisher}
+      />
+      <Input
+        label="Categoria"
+        name="category"
+        onChange={(event) => updateField('category', event.target.value)}
+        placeholder="Ex.: Ficção científica"
+        value={values.category}
       />
       <Input
         error={fieldErrors.coverImageUrl}

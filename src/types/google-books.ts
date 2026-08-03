@@ -4,6 +4,7 @@ export type GoogleBooksBook = Readonly<{
   isbn: string;
   publisher: string;
   coverImageUrl: string;
+  category: string;
 }>;
 
 export type GoogleBooksLookupResult =
@@ -23,6 +24,7 @@ export type GoogleBooksVolumeResponse = Readonly<{
       title?: unknown;
       authors?: unknown;
       publisher?: unknown;
+      categories?: unknown;
       imageLinks?: Readonly<{ thumbnail?: unknown }>;
     }>;
   }>[];

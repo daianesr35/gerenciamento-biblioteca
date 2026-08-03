@@ -16,6 +16,7 @@ export function mapPublicBookRow(row: PublicBookRow): PublicBook {
     author: row.autor,
     publisher: row.editora,
     coverImageUrl: row.imagem_capa,
+    category: row.categoria,
   };
 }
 

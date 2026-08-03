@@ -69,6 +69,9 @@ export async function lookupGoogleBookByIsbn(
     const authors = Array.isArray(volumeInfo?.authors)
       ? volumeInfo.authors.map(optionalString).filter(Boolean).join(', ')
       : '';
+    const category = Array.isArray(volumeInfo?.categories)
+      ? (volumeInfo.categories.map(optionalString).find(Boolean) ?? '')
+      : '';
 
     return {
       status: 'success',
@@ -78,6 +81,7 @@ export async function lookupGoogleBookByIsbn(
         isbn,
         publisher: optionalString(volumeInfo?.publisher),
         coverImageUrl: mapCoverUrl(volumeInfo?.imageLinks?.thumbnail),
+        category,
       },
     };
   } catch (error) {

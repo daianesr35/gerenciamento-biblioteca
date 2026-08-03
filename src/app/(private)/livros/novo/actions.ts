@@ -23,6 +23,7 @@ export async function createBookAction(
     isbn: readFormValue(formData, 'isbn'),
     publisher: readFormValue(formData, 'publisher'),
     coverImageUrl: readFormValue(formData, 'coverImageUrl'),
+    category: readFormValue(formData, 'category'),
   });
 
   if (result.status !== 'success') {

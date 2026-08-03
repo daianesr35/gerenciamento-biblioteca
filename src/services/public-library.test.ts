@@ -10,6 +10,7 @@ const ROW = {
   autor: 'Autora real',
   editora: 'Editora real',
   imagem_capa: null,
+  categoria: 'Ficção',
 };
 
 describe('service da Biblioteca pública', () => {
@@ -62,6 +63,7 @@ describe('service da Biblioteca pública', () => {
           author: 'Autora real',
           publisher: 'Editora real',
           coverImageUrl: null,
+          category: 'Ficção',
         },
       ],
     });

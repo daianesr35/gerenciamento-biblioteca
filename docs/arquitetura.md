@@ -155,6 +155,25 @@ existir apenas no ambiente do servidor local e da Vercel.
 
 ## Integrações externas
 
+### Sistema de recomendação
+
+A Página Pública calcula localmente até três recomendações a partir do livro
+selecionado e exclusivamente dos livros públicos já carregados em memória. O
+componente cliente reutiliza o serviço puro `src/services/book-recommendations.ts`
+e mantém o primeiro livro enquanto permite adicionar ou remover recomendações.
+Um único formulário envia os livros escolhidos para a mesma Server Action, que
+cria uma solicitação pendente individual por livro por meio da RPC pública já
+existente. O algoritmo não realiza I/O nem adiciona consultas ao Supabase, RPCs
+ou APIs externas.
+
+### Exclusão privada de livro
+
+A exclusão privada usa a RPC transacional
+`excluir_livro_privado(uuid)`. A operação valida a propriedade, impede a
+exclusão quando há empréstimo ativo e, para livro disponível, remove
+solicitações e empréstimos encerrados relacionados antes do livro. A execução
+foi concedida somente a `authenticated`.
+
 ### Google Books
 
 A consulta por ISBN é executada no servidor por uma Server Action exclusiva.
@@ -296,3 +315,4 @@ Nenhum projeto Vercel, recurso remoto ou deploy foi criado nesta etapa.
 | 5.5   | Proprietário vinculado a `auth.users`; RLS aplicada às cinco tabelas; acesso público reduzido a três RPCs e grants mínimos, sem integrar a interface.            |
 | 6.2   | Infraestrutura SSR criada com clientes browser/server/proxy, cookies renováveis, validação central de identidade e cabeçalhos anti-cache, sem fluxos funcionais. |
 | 8     | Consulta Google Books por ISBN integrada ao cadastro com preenchimento editável, fallback manual e persistência somente após confirmação do usuário.             |
+| 14.5  | Algoritmo puro integrado à Página Pública; seleção múltipla posterior mantém um formulário e cria uma solicitação individual por Livro.                          |

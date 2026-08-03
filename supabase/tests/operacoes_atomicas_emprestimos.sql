@@ -10,6 +10,10 @@ begin
     'authenticated',
     'public.registrar_devolucao_privada(uuid)',
     'execute'
+  ) or not has_function_privilege(
+    'authenticated',
+    'public.excluir_livro_privado(uuid)',
+    'execute'
   ) then
     raise exception 'Authenticated deve executar as RPCs privadas de empréstimos.';
   end if;
@@ -29,6 +33,14 @@ begin
   ) or has_function_privilege(
     'public',
     'public.registrar_devolucao_privada(uuid)',
+    'execute'
+  ) or has_function_privilege(
+    'anon',
+    'public.excluir_livro_privado(uuid)',
+    'execute'
+  ) or has_function_privilege(
+    'public',
+    'public.excluir_livro_privado(uuid)',
     'execute'
   ) then
     raise exception 'Anon e PUBLIC não devem executar as RPCs privadas de empréstimos.';
@@ -420,6 +432,129 @@ begin
     )
   ) = 0 then
     raise exception 'As operações devem manter bloqueios FOR UPDATE.';
+  end if;
+end;
+$$;
+
+insert into public.livros (id, biblioteca_id, titulo, autor, situacao)
+values
+  ('52000000-0000-0000-0000-000000000006', '32000000-0000-0000-0000-000000000001', 'Livro devolvido', 'A', 'disponivel'),
+  ('52000000-0000-0000-0000-000000000007', '32000000-0000-0000-0000-000000000001', 'Livro ativo', 'A', 'emprestado'),
+  ('52000000-0000-0000-0000-000000000008', '32000000-0000-0000-0000-000000000001', 'Livro nunca emprestado', 'A', 'disponivel');
+
+insert into public.solicitacoes (
+  id,
+  livro_id,
+  nome_solicitante,
+  telefone_solicitante,
+  status
+)
+values (
+  '62000000-0000-0000-0000-000000000006',
+  '52000000-0000-0000-0000-000000000006',
+  'Histórico devolvido',
+  '2206',
+  'confirmada'
+);
+
+insert into public.emprestimos (
+  id,
+  livro_id,
+  solicitacao_id,
+  nome_solicitante,
+  telefone_solicitante,
+  data_devolucao
+)
+values
+  (
+    '72000000-0000-0000-0000-000000000006',
+    '52000000-0000-0000-0000-000000000006',
+    '62000000-0000-0000-0000-000000000006',
+    'Histórico devolvido',
+    '2206',
+    now()
+  ),
+  (
+    '72000000-0000-0000-0000-000000000007',
+    '52000000-0000-0000-0000-000000000007',
+    null,
+    'Empréstimo ativo',
+    '2207',
+    null
+  );
+
+set local role authenticated;
+
+do $$
+begin
+  if public.excluir_livro_privado(
+    '52000000-0000-0000-0000-000000000008'
+  ) <> 'deleted' then
+    raise exception 'Livro nunca emprestado deveria ser excluído.';
+  end if;
+
+  if public.excluir_livro_privado(
+    '52000000-0000-0000-0000-000000000006'
+  ) <> 'deleted' then
+    raise exception 'Livro devolvido deveria ser excluído.';
+  end if;
+
+  if public.excluir_livro_privado(
+    '52000000-0000-0000-0000-000000000007'
+  ) <> 'active_loan' then
+    raise exception 'Livro com empréstimo ativo deveria permanecer bloqueado.';
+  end if;
+
+  if public.excluir_livro_privado(
+    '52000000-0000-0000-0000-000000000003'
+  ) <> 'not_found' then
+    raise exception 'Usuário não deveria excluir Livro de outra Biblioteca.';
+  end if;
+end;
+$$;
+
+reset role;
+
+do $$
+begin
+  if exists (
+    select 1 from public.livros
+    where id = '52000000-0000-0000-0000-000000000008'
+  ) then
+    raise exception 'Livro nunca emprestado deveria ter sido removido.';
+  end if;
+
+  if exists (
+    select 1 from public.livros
+    where id = '52000000-0000-0000-0000-000000000006'
+  ) or exists (
+    select 1 from public.solicitacoes
+    where id = '62000000-0000-0000-0000-000000000006'
+  ) or exists (
+    select 1 from public.emprestimos
+    where id = '72000000-0000-0000-0000-000000000006'
+  ) then
+    raise exception 'Exclusão deveria remover somente o histórico do Livro devolvido.';
+  end if;
+
+  if not exists (
+    select 1 from public.livros
+    where id = '52000000-0000-0000-0000-000000000007'
+  ) or not exists (
+    select 1 from public.emprestimos
+    where id = '72000000-0000-0000-0000-000000000007'
+  ) then
+    raise exception 'Bloqueio deveria preservar Livro e empréstimo ativos.';
+  end if;
+
+  if not exists (
+    select 1 from public.livros
+    where id = '52000000-0000-0000-0000-000000000003'
+  ) or not exists (
+    select 1 from public.emprestimos
+    where id = '72000000-0000-0000-0000-000000000002'
+  ) then
+    raise exception 'Tentativa de outra Biblioteca não deveria alterar registros.';
   end if;
 end;
 $$;

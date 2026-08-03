@@ -27,6 +27,7 @@ describe('LibraryPage', () => {
           author: 'Autora real',
           publisher: null,
           coverImageUrl: 'https://example.com/capa.jpg',
+          category: null,
           status: 'disponivel',
         },
         {
@@ -36,6 +37,7 @@ describe('LibraryPage', () => {
           author: 'Outro autor',
           publisher: null,
           coverImageUrl: null,
+          category: null,
           status: 'emprestado',
         },
       ],

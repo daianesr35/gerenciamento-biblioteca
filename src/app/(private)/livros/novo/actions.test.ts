@@ -29,6 +29,7 @@ describe('Server Action de consulta por ISBN', () => {
         isbn: '9781234567890',
         publisher: 'Editora',
         coverImageUrl: '',
+        category: 'Ficção científica',
       },
     };
     lookupGoogleBookByIsbn.mockResolvedValue(success);
@@ -66,6 +67,7 @@ describe('Server Action de cadastro de Livro', () => {
     formData.set('isbn', '123');
     formData.set('publisher', 'Editora');
     formData.set('coverImageUrl', 'https://example.com/capa.jpg');
+    formData.set('category', 'Ficção científica');
     formData.set('biblioteca_id', 'não permitido');
     formData.set('situacao', 'emprestado');
 
@@ -77,9 +79,20 @@ describe('Server Action de cadastro de Livro', () => {
       isbn: '123',
       publisher: 'Editora',
       coverImageUrl: 'https://example.com/capa.jpg',
+      category: 'Ficção científica',
     });
     expect(revalidatePath).toHaveBeenCalledWith('/biblioteca');
     expect(redirect).toHaveBeenCalledWith('/biblioteca');
+  });
+
+  it('encaminha categoria vazia para normalização pelo serviço', async () => {
+    createOwnBook.mockResolvedValue({ status: 'success' });
+
+    await createBookAction({ status: 'idle' }, new FormData());
+
+    expect(createOwnBook).toHaveBeenCalledWith(
+      expect.objectContaining({ category: '' }),
+    );
   });
 
   it('devolve validação sem revalidar ou redirecionar', async () => {

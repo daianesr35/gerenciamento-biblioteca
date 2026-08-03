@@ -27,6 +27,7 @@ describe('Server Action de edição de Livro', () => {
     formData.set('isbn', '');
     formData.set('publisher', '');
     formData.set('coverImageUrl', '');
+    formData.set('category', 'Ficção científica');
     formData.set('biblioteca_id', 'proibido');
     formData.set('situacao', 'emprestado');
 
@@ -38,6 +39,7 @@ describe('Server Action de edição de Livro', () => {
       isbn: '',
       publisher: '',
       coverImageUrl: '',
+      category: 'Ficção científica',
     });
     expect(revalidatePath.mock.calls).toEqual([
       ['/biblioteca'],
@@ -45,6 +47,17 @@ describe('Server Action de edição de Livro', () => {
       [`/livros/${BOOK_ID}/editar`],
     ]);
     expect(redirect).toHaveBeenCalledWith(`/livros/${BOOK_ID}`);
+  });
+
+  it('encaminha categoria vazia para permitir sua remoção', async () => {
+    updateOwnBook.mockResolvedValue({ status: 'success' });
+
+    await updateBookAction(BOOK_ID, { status: 'idle' }, new FormData());
+
+    expect(updateOwnBook).toHaveBeenCalledWith(
+      BOOK_ID,
+      expect.objectContaining({ category: '' }),
+    );
   });
 
   it.each([

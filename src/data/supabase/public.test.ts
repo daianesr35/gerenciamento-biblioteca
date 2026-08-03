@@ -54,6 +54,7 @@ describe('adaptador das RPCs públicas', () => {
       autor: 'Autora',
       editora: null,
       imagem_capa: null,
+      categoria: 'Ficção',
     };
     const rpc = vi
       .fn()

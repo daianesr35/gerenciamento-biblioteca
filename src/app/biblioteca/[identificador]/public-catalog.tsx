@@ -4,6 +4,10 @@ import { useActionState, useEffect, useRef, useState } from 'react';
 import { useFormStatus } from 'react-dom';
 
 import { Button, CoverPlaceholder, Input } from '@/components/ui';
+import {
+  recommendBooks,
+  type BookRecommendation,
+} from '@/services/book-recommendations';
 import type { PublicLoanRequestActionState } from '@/types/loan-requests';
 import type { PublicBook } from '@/types/public-library';
 
@@ -24,6 +28,29 @@ export function filterPublicBooks(
   );
 }
 
+export function updateBookSelection(
+  selectedBookIds: readonly string[],
+  primaryBookId: string,
+  bookId: string,
+): Readonly<{
+  selectedBookIds: readonly string[];
+  primaryBookId: string;
+}> {
+  if (selectedBookIds.includes(bookId)) {
+    const nextIds = selectedBookIds.filter((id) => id !== bookId);
+    return {
+      selectedBookIds: nextIds,
+      primaryBookId:
+        bookId === primaryBookId ? (nextIds[0] ?? '') : primaryBookId,
+    };
+  }
+
+  return {
+    selectedBookIds: [...selectedBookIds, bookId],
+    primaryBookId: selectedBookIds.length === 0 ? bookId : primaryBookId,
+  };
+}
+
 function SubmitRequestButton() {
   const { pending } = useFormStatus();
 
@@ -34,12 +61,12 @@ function SubmitRequestButton() {
   );
 }
 
-function PublicRequestForm({
-  book,
+export function PublicRequestForm({
+  books,
   publicIdentifier,
   onCreated,
 }: {
-  book: PublicBook;
+  books: readonly PublicBook[];
   publicIdentifier: string;
   onCreated: () => void;
 }) {
@@ -65,7 +92,7 @@ function PublicRequestForm({
   const requestError =
     requestState.status === 'error'
       ? requestState.category === 'book_unavailable'
-        ? 'Este livro não está mais disponível. Escolha outro livro e tente novamente.'
+        ? 'Um ou mais livros não estão mais disponíveis. Revise a seleção e tente novamente.'
         : 'Não foi possível enviar a solicitação. Tente novamente.'
       : null;
 
@@ -74,14 +101,21 @@ function PublicRequestForm({
       <div className="section-heading">
         <div>
           <h2 id="public-request-title">Solicitar empréstimo</h2>
-          <p>
-            Livro selecionado: <strong>{book.title}</strong>
-          </p>
+          <p>Livros selecionados:</p>
+          <ul>
+            {books.map((book) => (
+              <li key={book.id}>
+                <strong>{book.title}</strong>
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
       <form action={requestAction}>
         <input name="publicIdentifier" type="hidden" value={publicIdentifier} />
-        <input name="bookId" type="hidden" value={book.id} />
+        {books.map((book) => (
+          <input key={book.id} name="bookId" type="hidden" value={book.id} />
+        ))}
         <Input
           autoComplete="name"
           error={fieldErrors.requesterName}
@@ -112,6 +146,65 @@ function PublicRequestForm({
   );
 }
 
+export function BookRecommendations({
+  recommendations,
+  onToggle,
+  selectedBookIds = [],
+}: {
+  recommendations: readonly BookRecommendation[];
+  onToggle: (bookId: string) => void;
+  selectedBookIds?: readonly string[];
+}) {
+  if (recommendations.length === 0) {
+    return null;
+  }
+
+  return (
+    <section
+      aria-labelledby="public-recommendations-title"
+      className="public-books"
+    >
+      <div className="section-heading">
+        <h2 id="public-recommendations-title">Você também pode gostar</h2>
+      </div>
+      <div className="public-book-grid public-catalog-grid">
+        {recommendations.map(({ book, reasons }) => (
+          <article className="public-book" key={book.id}>
+            {book.coverImageUrl ? (
+              // A URL é um dado bibliográfico e pode ter qualquer host.
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                alt={`Capa de ${book.title}`}
+                className="public-cover public-cover-image"
+                src={book.coverImageUrl}
+              />
+            ) : (
+              <CoverPlaceholder label={`Capa indisponível de ${book.title}`} />
+            )}
+            <h3>{book.title}</h3>
+            <p>{book.author}</p>
+            {reasons.map((reason) => (
+              <p key={reason}>{reason}</p>
+            ))}
+            <Button
+              aria-pressed={selectedBookIds.includes(book.id)}
+              onClick={() => onToggle(book.id)}
+              type="button"
+              variant={
+                selectedBookIds.includes(book.id) ? 'primary' : 'secondary'
+              }
+            >
+              {selectedBookIds.includes(book.id)
+                ? 'Remover da seleção'
+                : 'Adicionar à seleção'}
+            </Button>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 export function PublicCatalog({
   books,
   publicIdentifier,
@@ -120,14 +213,33 @@ export function PublicCatalog({
   publicIdentifier: string;
 }) {
   const [search, setSearch] = useState('');
-  const [selectedBookId, setSelectedBookId] = useState('');
-  const [requestSubmitted, setRequestSubmitted] = useState(false);
+  const [primaryBookId, setPrimaryBookId] = useState('');
+  const [selectedBookIds, setSelectedBookIds] = useState<readonly string[]>([]);
+  const [submittedRequestCount, setSubmittedRequestCount] = useState(0);
   const requestSectionRef = useRef<HTMLElement>(null);
   const filteredBooks = filterPublicBooks(books, search);
-  const selectedBook = books.find((book) => book.id === selectedBookId);
+  const primaryBook = books.find((book) => book.id === primaryBookId);
+  const selectedBooks = selectedBookIds.flatMap((bookId) => {
+    const book = books.find((candidate) => candidate.id === bookId);
+    return book ? [book] : [];
+  });
+  const recommendations = primaryBook ? recommendBooks(primaryBook, books) : [];
+
+  function toggleBook(bookId: string) {
+    setSubmittedRequestCount(0);
+    setSelectedBookIds((currentIds) => {
+      const nextSelection = updateBookSelection(
+        currentIds,
+        primaryBookId,
+        bookId,
+      );
+      setPrimaryBookId(nextSelection.primaryBookId);
+      return nextSelection.selectedBookIds;
+    });
+  }
 
   useEffect(() => {
-    if (!selectedBook) {
+    if (selectedBooks.length === 0) {
       return;
     }
 
@@ -137,7 +249,7 @@ export function PublicCatalog({
         : 'smooth',
       block: 'start',
     });
-  }, [selectedBook]);
+  }, [selectedBooks.length]);
 
   return (
     <>
@@ -163,7 +275,7 @@ export function PublicCatalog({
           {filteredBooks.map((book) => (
             <article
               className={`public-book ${
-                selectedBookId === book.id ? 'selected' : ''
+                selectedBookIds.includes(book.id) ? 'selected' : ''
               }`}
               key={book.id}
             >
@@ -186,15 +298,14 @@ export function PublicCatalog({
                 <p className="public-book-publisher">{book.publisher}</p>
               )}
               <Button
-                aria-pressed={selectedBookId === book.id}
-                onClick={() => {
-                  setRequestSubmitted(false);
-                  setSelectedBookId(book.id);
-                }}
+                aria-pressed={selectedBookIds.includes(book.id)}
+                onClick={() => toggleBook(book.id)}
                 type="button"
-                variant={selectedBookId === book.id ? 'primary' : 'secondary'}
+                variant={
+                  selectedBookIds.includes(book.id) ? 'primary' : 'secondary'
+                }
               >
-                {selectedBookId === book.id ? 'Selecionado' : 'Solicitar'}
+                {selectedBookIds.includes(book.id) ? 'Remover' : 'Solicitar'}
               </Button>
             </article>
           ))}
@@ -205,29 +316,37 @@ export function PublicCatalog({
           </p>
         )}
       </section>
-      {selectedBook && (
+      <BookRecommendations
+        onToggle={toggleBook}
+        recommendations={recommendations}
+        selectedBookIds={selectedBookIds}
+      />
+      {selectedBooks.length > 0 && (
         <section
           aria-labelledby="public-request-title"
           className="public-request"
           ref={requestSectionRef}
         >
           <PublicRequestForm
-            book={selectedBook}
+            books={selectedBooks}
             onCreated={() => {
-              setSelectedBookId('');
-              setRequestSubmitted(true);
+              setSubmittedRequestCount(selectedBooks.length);
+              setPrimaryBookId('');
+              setSelectedBookIds([]);
             }}
             publicIdentifier={publicIdentifier}
           />
         </section>
       )}
-      {requestSubmitted && (
+      {submittedRequestCount > 0 && (
         <p
           aria-live="polite"
           className="public-request-message public-request-success success"
           role="status"
         >
-          Solicitação enviada com sucesso.
+          {submittedRequestCount === 1
+            ? 'Solicitação enviada com sucesso.'
+            : 'Solicitações enviadas com sucesso.'}
         </p>
       )}
     </>

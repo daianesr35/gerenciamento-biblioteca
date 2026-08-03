@@ -21,6 +21,7 @@ const ROW = {
   autor: 'Autora',
   editora: null,
   imagem_capa: null,
+  categoria: null,
   situacao: 'disponivel',
 };
 
@@ -166,6 +167,7 @@ describe('atualização de Livro', () => {
         isbn: null,
         publisher: 'Editora',
         coverImageUrl: null,
+        category: 'Ficção',
       }),
     ).resolves.toBe(true);
 
@@ -175,6 +177,7 @@ describe('atualização de Livro', () => {
       isbn: null,
       editora: 'Editora',
       imagem_capa: null,
+      categoria: 'Ficção',
     });
     expect(query.byLibrary).toHaveBeenCalledWith('biblioteca_id', LIBRARY_ID);
     expect(query.byId).toHaveBeenCalledWith('id', BOOK_ID);
@@ -191,6 +194,7 @@ describe('atualização de Livro', () => {
         isbn: null,
         publisher: null,
         coverImageUrl: null,
+        category: 'Ficção',
       }),
     ).resolves.toBe(false);
 
@@ -241,6 +245,7 @@ describe('inserção de Livro', () => {
         isbn: null,
         publisher: 'Editora',
         coverImageUrl: null,
+        category: 'Ficção',
       }),
     ).resolves.toBeUndefined();
 
@@ -252,7 +257,25 @@ describe('inserção de Livro', () => {
       isbn: null,
       editora: 'Editora',
       imagem_capa: null,
+      categoria: 'Ficção',
     });
+  });
+
+  it('persiste categoria nula quando o formulário atual não a envia', async () => {
+    const insert = vi.fn(async () => ({ error: null }));
+    createSupabaseServerClient.mockResolvedValue(createInsertClient(insert));
+
+    await insertAuthenticatedBookRow({
+      title: 'Livro sem categoria',
+      author: 'Autora',
+      isbn: null,
+      publisher: null,
+      coverImageUrl: null,
+    });
+
+    expect(insert).toHaveBeenCalledWith(
+      expect.objectContaining({ categoria: null }),
+    );
   });
 
   it('normaliza falha de inserção', async () => {

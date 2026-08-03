@@ -33,6 +33,7 @@ describe('consulta de livro por ISBN', () => {
             title: '  Livro encontrado ',
             authors: [' Autora Um ', '', 'Autor Dois'],
             publisher: ' Editora ',
+            categories: [null, '  ', ' Ficção científica ', 'Aventura'],
             imageLinks: { thumbnail: 'http://example.com/capa.jpg' },
           },
         },
@@ -50,6 +51,7 @@ describe('consulta de livro por ISBN', () => {
         isbn: '123456789X',
         publisher: 'Editora',
         coverImageUrl: 'https://example.com/capa.jpg',
+        category: 'Ficção científica',
       },
     });
     expect(lookupVolume).toHaveBeenCalledOnce();
@@ -77,7 +79,20 @@ describe('consulta de livro por ISBN', () => {
         isbn: 'ABCDEFGHIJKLM',
         publisher: '',
         coverImageUrl: '',
+        category: '',
       },
+    });
+  });
+
+  it('mantém categoria vazia quando a API não retorna uma lista válida', async () => {
+    await expect(
+      lookupGoogleBookByIsbn('9781234567890', async () => ({
+        totalItems: 1,
+        items: [{ volumeInfo: { categories: 'Ficção' } }],
+      })),
+    ).resolves.toMatchObject({
+      status: 'success',
+      book: { category: '' },
     });
   });
 

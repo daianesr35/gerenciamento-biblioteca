@@ -10,6 +10,7 @@ const filledForm: NewBookFormValues = {
   isbn: '978-85-359-3278-6',
   publisher: 'Editora digitada',
   coverImageUrl: 'https://example.com/capa-digitada.jpg',
+  category: 'Categoria digitada',
 };
 
 function success(
@@ -23,19 +24,21 @@ function success(
       isbn: '9788535932786',
       publisher: 'Editora encontrada',
       coverImageUrl: 'https://example.com/capa-encontrada.jpg',
+      category: 'Ficção científica',
       ...book,
     },
   };
 }
 
 describe('preenchimento do formulário pela consulta ISBN', () => {
-  it('preenche os cinco campos retornados', () => {
+  it('preenche os seis campos retornados', () => {
     expect(mergeBookValues(filledForm, success())).toEqual({
       title: 'Título encontrado',
       author: 'Autor encontrado',
       isbn: '9788535932786',
       publisher: 'Editora encontrada',
       coverImageUrl: 'https://example.com/capa-encontrada.jpg',
+      category: 'Ficção científica',
     });
   });
 
@@ -47,6 +50,7 @@ describe('preenchimento do formulário pela consulta ISBN', () => {
           author: '',
           publisher: '',
           coverImageUrl: '',
+          category: '',
         }),
       ),
     ).toEqual({

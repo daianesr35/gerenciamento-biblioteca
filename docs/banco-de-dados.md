@@ -383,6 +383,18 @@ possuem assinaturas tipadas e tiveram `EXECUTE` revogado de `PUBLIC` e
 Não foram usados `service_role`, credenciais, claims editáveis de
 `user_metadata`, policies genéricas ou funções auxiliares internas.
 
+### Exclusão privada transacional
+
+A migration `20260803035809_permitir_exclusao_de_livro_devolvido.sql` adiciona
+a RPC `excluir_livro_privado(uuid)`. A função valida `auth.uid()` e a
+propriedade do Livro, bloqueia a exclusão quando existe Empréstimo ativo e,
+quando o Livro está disponível, remove Solicitações e Empréstimos encerrados
+relacionados antes de excluir o Livro na mesma transação. Assim, um Livro já
+devolvido pode ser excluído sem deixar registros dependentes.
+
+O `EXECUTE` foi revogado de `PUBLIC` e `anon` e concedido somente a
+`authenticated`; as validações internas de propriedade permanecem obrigatórias.
+
 ### Testes de segurança
 
 `supabase/tests/rls_e_acesso_publico.sql` cria dois usuários, dois

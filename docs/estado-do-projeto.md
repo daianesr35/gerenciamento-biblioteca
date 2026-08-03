@@ -713,3 +713,95 @@ e o acesso posterior a uma rota privada foi redirecionado ao Login.
 
 A Tarefa 13.3 e a Etapa 13 estão concluídas. O sistema está pronto para o
 encerramento definitivo do projeto, sem pendências bloqueadoras conhecidas.
+
+# Atualização — Tarefa 14.5
+
+A Página Pública passou a reutilizar o algoritmo puro de recomendação da Tarefa
+14.4. Quando há um livro selecionado, são calculadas em memória até três
+recomendações usando somente os livros públicos já carregados. A seção “Você
+também pode gostar” exibe capa, título, autor e as justificativas retornadas pelo
+algoritmo e permanece oculta quando o resultado é vazio.
+
+A seleção de uma recomendação reutiliza o mesmo `selectedBookId`, a rolagem e o
+formulário existentes, sem criar outro fluxo ou Server Action de solicitação.
+Não houve alteração no algoritmo, banco, migrations, RPCs, Google Books,
+autenticação, empréstimos, devoluções ou QR Code. A próxima tarefa é a Tarefa
+14.6 — Validação Integrada e Regressões.
+
+# Atualização — Tarefa 14.6
+
+A validação integrada da Etapa 14 revisou o diff consolidado, as nove migrations,
+os testes SQL, a categoria, a integração com Google Books, o algoritmo de
+recomendação, a Página Pública e as regressões cobertas pela suíte existente.
+Não foi encontrado defeito de código causado pela Etapa 14 e nenhuma correção de
+código foi necessária.
+
+Foram aprovados `git diff --check`, ESLint, Prettier, TypeScript, 73 testes
+focados, a suíte completa com 42 arquivos e 226 testes e o build de produção. O
+primeiro build foi impedido por um servidor Next anterior que mantinha um log da
+pasta `.next` aberto; depois de confirmar e encerrar somente esse processo, o
+mesmo build foi repetido e aprovado.
+
+O banco local foi iniciado e reconstruído do zero com as nove migrations. A
+lista local confirmou as nove versões aplicadas. `supabase test db` executou os
+quatro arquivos SQL, mas retornou código 1 pela ausência de plano TAP, limitação
+já conhecida para os testes do projeto baseados em `DO/RAISE`. Os quatro scripts
+foram então executados diretamente com `psql -v ON_ERROR_STOP=1` e aprovados,
+incluindo categoria anulável, rejeição de texto vazio ou composto por espaços,
+RLS, grants, acesso público por RPC, solicitações, empréstimos e devoluções.
+
+Na tentativa de validação manual, o servidor deveria usar a stack local, mas o
+comando `supabase status -o env` forneceu somente `DB_URL`. Como as variáveis
+públicas do Supabase não foram sobrescritas, o Next carregou o `.env.local` que
+já apontava para o ambiente remoto. Antes da divergência ser detectada, foram
+criados no ambiente remoto uma conta de teste, dois livros de teste e uma
+solicitação de teste. O servidor foi encerrado assim que o destino efetivo foi
+confirmado e nenhuma limpeza remota foi executada sem autorização.
+
+Os dados remotos foram posteriormente removidos em uma transação restrita à
+conta `validacao.etapa14@example.com` e à biblioteca de teste comprovadamente
+vinculada a ela. A limpeza removeu a solicitação, os dois livros, a biblioteca,
+o proprietário e o usuário de autenticação; não havia empréstimos relacionados.
+A verificação posterior retornou zero registros relacionados em todas essas
+tabelas.
+
+O bloqueador operacional está resolvido, a Tarefa 14.6 está concluída e o projeto
+está pronto para a Tarefa 14.7. Antes de qualquer teste manual futuro, o destino
+efetivo das variáveis do Supabase deverá ser confirmado. Nenhuma nova
+funcionalidade, migration, dependência, alteração de peso, commit, push ou deploy
+foi realizada nesta tarefa.
+
+# Validação complementar após a Tarefa 14.6
+
+Foi validada a alteração de comportamento originalmente planejado da Página
+Pública: o visitante agora pode manter o primeiro Livro selecionado, adicionar
+ou remover recomendações e enviar um único formulário; cada Livro escolhido
+gera uma Solicitação pendente separada pela RPC pública existente.
+
+Também foram validadas as equivalências de categorias em português e inglês, a
+remoção de Livros duplicados das recomendações e a exclusão transacional de um
+Livro após a devolução, preservando o bloqueio para Empréstimo ativo. A migration
+local `20260803035809_permitir_exclusao_de_livro_devolvido.sql` está alinhada ao
+histórico remoto. A RPC existe no ambiente remoto, com execução somente para
+`authenticated`; nenhuma migration foi reaplicada remotamente.
+
+Os testes focados, o teste SQL de operações atômicas e as validações técnicas
+solicitadas foram aprovados. Não há bloqueador conhecido nas alterações recentes,
+e o projeto está pronto para a Tarefa 14.7.
+
+# Encerramento da Etapa 14
+
+A Tarefa 14.7 concluiu a revisão final do conjunto da Etapa 14 sem implementar
+novas funcionalidades, alterar regras de negócio, refatorar o código ou
+redesenhar telas. A revisão não identificou dependências novas, credenciais,
+arquivos temporários versionados nem alterações fora do escopo.
+
+As validações finais aprovaram `git diff --check`, ESLint, Prettier, TypeScript,
+os 42 arquivos da suíte com 239 testes e o build de produção. O sistema de
+recomendação mantém os pesos `+5` para categoria, `+4` para autor, `+2` para
+editora e `+1` por palavra relevante compartilhada no título, pontuação mínima
+`4` e limite de três recomendações.
+
+A Etapa 14 — Sistema de Recomendação está formalmente concluída, sem bloqueadores
+conhecidos. O projeto está consistente para servir de base ao artigo da
+disciplina de Tópicos Avançados.

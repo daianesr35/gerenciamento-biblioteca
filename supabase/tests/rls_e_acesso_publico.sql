@@ -64,30 +64,46 @@ values
 insert into public.livros (
   id,
   biblioteca_id,
+  isbn,
   titulo,
   autor,
+  editora,
+  imagem_capa,
+  categoria,
   situacao
 )
 values
   (
     '50000000-0000-0000-0000-000000000001',
     '30000000-0000-0000-0000-000000000001',
+    '9780000000001',
     'Livro disponível A',
     'Autora A',
+    'Editora A',
+    'https://example.com/capa-a.jpg',
+    'Ficção',
     'disponivel'
   ),
   (
     '50000000-0000-0000-0000-000000000002',
     '30000000-0000-0000-0000-000000000001',
+    null,
     'Livro emprestado A',
     'Autor A',
+    null,
+    null,
+    null,
     'emprestado'
   ),
   (
     '50000000-0000-0000-0000-000000000003',
     '30000000-0000-0000-0000-000000000002',
+    null,
     'Livro disponível B',
     'Autora B',
+    null,
+    null,
+    'História',
     'disponivel'
   );
 
@@ -332,10 +348,74 @@ end;
 $$;
 
 reset role;
+
+do $$
+begin
+  if not exists (
+    select 1
+    from information_schema.columns
+    where table_schema = 'public'
+      and table_name = 'livros'
+      and column_name = 'categoria'
+      and is_nullable = 'YES'
+      and data_type = 'text'
+  ) then
+    raise exception 'A coluna opcional livros.categoria deveria existir como text.';
+  end if;
+
+  if not (
+    select relrowsecurity
+    from pg_class
+    where oid = 'public.livros'::regclass
+  ) then
+    raise exception 'RLS deveria permanecer habilitada em public.livros.';
+  end if;
+
+  insert into public.livros (biblioteca_id, titulo, autor, categoria, situacao)
+  values (
+    '30000000-0000-0000-0000-000000000001',
+    'Livro com categoria nula',
+    'Autora A',
+    null,
+    'emprestado'
+  );
+
+  begin
+    insert into public.livros (biblioteca_id, titulo, autor, categoria)
+    values (
+      '30000000-0000-0000-0000-000000000001',
+      'Categoria inválida',
+      'Autora A',
+      '   '
+    );
+    raise exception 'Categoria composta apenas por espaços deveria ser rejeitada.';
+  exception
+    when check_violation then
+      null;
+  end;
+
+  begin
+    insert into public.livros (biblioteca_id, titulo, autor, categoria)
+    values (
+      '30000000-0000-0000-0000-000000000001',
+      'Categoria vazia',
+      'Autora A',
+      ''
+    );
+    raise exception 'Categoria vazia deveria ser rejeitada.';
+  exception
+    when check_violation then
+      null;
+  end;
+end;
+$$;
+
 set local request.jwt.claims = '{"role":"anon"}';
 set local role anon;
 
 do $$
+declare
+  v_livro record;
 begin
   if not public.localizar_biblioteca_publica(
     '40000000-0000-0000-0000-000000000001'
@@ -368,6 +448,33 @@ begin
     )
   ) <> 1 then
     raise exception 'Catálogo público deveria conter apenas o Livro disponível A.';
+  end if;
+
+  select * into strict v_livro
+  from public.listar_livros_publicos(
+    '40000000-0000-0000-0000-000000000001'
+  );
+
+  if v_livro.id <> '50000000-0000-0000-0000-000000000001'
+    or v_livro.isbn <> '9780000000001'
+    or v_livro.titulo <> 'Livro disponível A'
+    or v_livro.autor <> 'Autora A'
+    or v_livro.editora <> 'Editora A'
+    or v_livro.imagem_capa <> 'https://example.com/capa-a.jpg'
+    or v_livro.categoria <> 'Ficção' then
+    raise exception 'Catálogo público deveria preservar todas as colunas e retornar categoria.';
+  end if;
+
+  if not has_function_privilege(
+    'anon',
+    'public.listar_livros_publicos(uuid)',
+    'EXECUTE'
+  ) then
+    raise exception 'Anon deveria preservar EXECUTE em listar_livros_publicos.';
+  end if;
+
+  if has_table_privilege('anon', 'public.livros', 'SELECT') then
+    raise exception 'Anon não deveria receber grant SELECT em public.livros.';
   end if;
 end;
 $$;
@@ -405,6 +512,16 @@ begin
   raise exception 'Livro de outra Biblioteca deveria ser negado.';
 exception
   when raise_exception then
+    null;
+end;
+$$;
+
+do $$
+begin
+  perform 1 from public.livros;
+  raise exception 'Anon não deveria ler Livros diretamente.';
+exception
+  when insufficient_privilege then
     null;
 end;
 $$;

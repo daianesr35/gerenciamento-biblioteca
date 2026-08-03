@@ -3,7 +3,8 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import type { BookStatus } from '@/types/books';
 import type { CreateBookInput, UpdateBookInput } from '@/types/books';
 
-export const BOOK_COLUMNS = 'id,isbn,titulo,autor,editora,imagem_capa,situacao';
+export const BOOK_COLUMNS =
+  'id,isbn,titulo,autor,editora,imagem_capa,categoria,situacao';
 
 export type BookRow = Readonly<{
   id: string;
@@ -12,6 +13,7 @@ export type BookRow = Readonly<{
   autor: string;
   editora: string | null;
   imagem_capa: string | null;
+  categoria: string | null;
   situacao: BookStatus;
 }>;
 
@@ -83,6 +85,7 @@ export async function insertAuthenticatedBookRow(
     autor: input.author,
     editora: input.publisher,
     imagem_capa: input.coverImageUrl,
+    categoria: input.category ?? null,
   });
 
   if (error) {
@@ -104,6 +107,7 @@ export async function updateAuthenticatedBookRow(
       autor: input.author,
       editora: input.publisher,
       imagem_capa: input.coverImageUrl,
+      categoria: input.category ?? null,
     })
     .eq('biblioteca_id', libraryId)
     .eq('id', bookId)
@@ -121,21 +125,20 @@ export async function deleteAuthenticatedBookRow(
   bookId: string,
 ): Promise<DeleteBookRowResult> {
   const supabase = await createSupabaseServerClient();
-  const libraryId = await getAuthenticatedLibraryId(supabase);
-  const { data, error } = await supabase
-    .from('livros')
-    .delete()
-    .eq('biblioteca_id', libraryId)
-    .eq('id', bookId)
-    .select('id')
-    .maybeSingle();
+  const { data, error } = await supabase.rpc('excluir_livro_privado', {
+    p_livro_id: bookId,
+  });
 
-  if (error?.code === '23503') {
-    return 'related_records';
-  }
   if (error) {
     throw { code: 'book_delete_unavailable' };
   }
 
-  return data === null ? 'not_found' : 'deleted';
+  if (data === 'deleted' || data === 'not_found') {
+    return data;
+  }
+  if (data === 'active_loan') {
+    return 'related_records';
+  }
+
+  throw { code: 'book_delete_unavailable' };
 }

@@ -19,7 +19,7 @@ async function renderPage(id = BOOK_ID) {
 describe('página de edição de Livro', () => {
   beforeEach(() => getOwnBookByIdMock.mockReset());
 
-  it('consulta uma vez e preenche os cinco campos reais', async () => {
+  it('consulta uma vez e preenche os seis campos reais', async () => {
     getOwnBookByIdMock.mockResolvedValue({
       status: 'success',
       book: {
@@ -29,6 +29,7 @@ describe('página de edição de Livro', () => {
         isbn: '123',
         publisher: 'Editora real',
         coverImageUrl: 'https://example.com/capa.jpg',
+        category: 'Ficção científica',
         status: 'disponivel',
       },
     });
@@ -43,6 +44,8 @@ describe('página de edição de Livro', () => {
     expect(html).toContain('value="123"');
     expect(html).toContain('value="Editora real"');
     expect(html).toContain('value="https://example.com/capa.jpg"');
+    expect(html).toContain('name="category"');
+    expect(html).toContain('value="Ficção científica"');
     expect(html).not.toContain('name="situacao"');
     expect(html).not.toContain('name="biblioteca_id"');
     expect(html).not.toContain('Excluir');
@@ -58,13 +61,14 @@ describe('página de edição de Livro', () => {
         isbn: null,
         publisher: null,
         coverImageUrl: null,
+        category: null,
         status: 'disponivel',
       },
     });
 
     const html = await renderPage();
 
-    expect(html.match(/value=""/g)).toHaveLength(3);
+    expect(html.match(/value=""/g)).toHaveLength(4);
   });
 
   it.each(['invalid_id', 'not_found'] as const)(

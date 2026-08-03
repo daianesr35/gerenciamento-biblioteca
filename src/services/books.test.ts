@@ -18,6 +18,7 @@ const ROW: BookRow = {
   autor: 'Autora',
   editora: 'Editora',
   imagem_capa: 'https://example.com/capa.jpg',
+  categoria: 'Ficção',
   situacao: 'disponivel',
 };
 
@@ -30,6 +31,7 @@ describe('mapeamento de Livro', () => {
       author: 'Autora',
       publisher: 'Editora',
       coverImageUrl: 'https://example.com/capa.jpg',
+      category: 'Ficção',
       status: 'disponivel',
     });
   });
@@ -41,12 +43,14 @@ describe('mapeamento de Livro', () => {
         isbn: null,
         editora: null,
         imagem_capa: null,
+        categoria: null,
         situacao: 'emprestado',
       }),
     ).toMatchObject({
       isbn: null,
       publisher: null,
       coverImageUrl: null,
+      category: null,
       status: 'emprestado',
     });
   });
@@ -82,6 +86,7 @@ describe('edição de Livro próprio', () => {
           isbn: ' ',
           publisher: ' Editora ',
           coverImageUrl: '',
+          category: '   ',
         },
         updateBook,
       ),
@@ -92,6 +97,7 @@ describe('edição de Livro próprio', () => {
       isbn: null,
       publisher: 'Editora',
       coverImageUrl: null,
+      category: null,
     });
   });
 
@@ -164,6 +170,7 @@ describe('cadastro de Livro próprio', () => {
           isbn: '  9780000000001  ',
           publisher: '   ',
           coverImageUrl: '',
+          category: ' Ficção ',
         },
         insertBook,
       ),
@@ -174,6 +181,7 @@ describe('cadastro de Livro próprio', () => {
       isbn: '9780000000001',
       publisher: null,
       coverImageUrl: null,
+      category: 'Ficção',
     });
   });
 

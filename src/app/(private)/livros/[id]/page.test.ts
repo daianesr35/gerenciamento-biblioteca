@@ -33,6 +33,7 @@ describe('BookDetailsPage', () => {
         author: 'Autora real',
         publisher: 'Editora real',
         coverImageUrl: 'https://example.com/capa.jpg',
+        category: 'Ficção científica',
         status: 'disponivel',
       },
     });
@@ -45,6 +46,8 @@ describe('BookDetailsPage', () => {
     expect(html).toContain('Autora real');
     expect(html).toContain('9780000000001');
     expect(html).toContain('Editora real');
+    expect(html).toContain('Categoria');
+    expect(html).toContain('Ficção científica');
     expect(html).toContain('Disponível');
     expect(html).toContain('src="https://example.com/capa.jpg"');
     expect(html).toContain('alt="Capa de Livro real"');
@@ -70,6 +73,7 @@ describe('BookDetailsPage', () => {
         author: 'Autor real',
         publisher: null,
         coverImageUrl: null,
+        category: null,
         status: 'emprestado',
       },
     });
@@ -77,7 +81,7 @@ describe('BookDetailsPage', () => {
     const html = await renderPage();
 
     expect(html).toContain('Emprestado');
-    expect(html.match(/Não informado/g)).toHaveLength(2);
+    expect(html.match(/Não informado/g)).toHaveLength(3);
     expect(html).toContain('Capa indisponível de Livro sem capa');
     expect(html).not.toContain('<img');
   });
